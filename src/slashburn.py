@@ -8,6 +8,7 @@ from scipy.sparse import coo_matrix
 
 def scc(nodes=[], edges=[]):
     """
+    Checks subgraphs (strongly connected means every vertex is reachable from every other vertex)
     A function that computes strongly connected components using Kosaraju's algorithm. Returns list of components, which are list of nodes.
     Args:
         nodes (list): List of nodes of any type.
@@ -148,11 +149,11 @@ def slashburn(A, k=None, greedy=True):
             break
         nodes = list(degree.keys())
         edges = []
-        for source in alists:
+        for source in alists: #create edges from nodes remaining after removing hub nodes
             for target in alists[source]:
                 if target in alists:
                     edges.append((source, target))
-        ccs = scc(nodes, edges)
+        ccs = scc(nodes, edges) # Generates list of subgraphs left after hub removal
         m = len(ccs)
         sizes = {i: len(ccs[i]) for i in range(m)}
         ordering = sorted(sizes, key=sizes.get)

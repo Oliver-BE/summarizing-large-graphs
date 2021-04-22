@@ -10,6 +10,12 @@ An implementation of the VoG algorithm (Vocabulary-based summarization of Graphs
 
 Each subgraph **x** is first tested against each vocabulary structure type above. If a perfect match for any of the above six structures is not found, the subgraph **x** is then encoded as __*each*__ substructure and is labeled as that which results in the lowest encoding cost according to MDL.
 
+**Step 3**: Once we have represented each subgraph **x** as one of the vocabulary structures, MDL is used to associate the candidate structure with its encoding cost and is added to the candidate set **C**.
+
+**Step 4**: Now, given a set of candidate structures **C** and their associated encoding costs, the heuristics "Plain", "Top 10", "Top 100", and "Greedy 'N Forget" are used to select a non-redundant subset of candidate structures to represent the graph model **M**. The model of the heuristic with the lowest description cost is selected.
+
+**Output**: A graph summary model **M** and its associated encoding cost.
+
 ## Getting set up
 From the base directory, create your own virtual environment (running Python 3.9.0), activate it, and install the necessary package dependencies:
 1. `$ python3.9 -m venv env` 
