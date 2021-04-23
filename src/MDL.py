@@ -14,7 +14,7 @@ are not using "optimal prefix codes." What does it mean in this context to have 
 (Is this simply a 0 in the adjaceny matrix? And if so, is the number of present edges simply the number
 of edges that we can find by doing |area(nc)|?)
 
-Does the area(nc)
+Does the area(nc) just mean the total size of the adjaceny matrix?
 
 Is n in L(s) the total number of nodes in the initial input graph G? This is what it seems like
 based on the notation table (Table 1) but we wanted to confirm.
