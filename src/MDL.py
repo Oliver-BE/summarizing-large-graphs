@@ -13,6 +13,11 @@ Also, we are a bit confused on what it means to identify which edges are present
 are not using "optimal prefix codes." What does it mean in this context to have a missing edge? 
 (Is this simply a 0 in the adjaceny matrix? And if so, is the number of present edges simply the number
 of edges that we can find by doing |area(nc)|?)
+
+Does the area(nc)
+
+Is n in L(s) the total number of nodes in the initial input graph G? This is what it seems like
+based on the notation table (Table 1) but we wanted to confirm.
 """
 
 """
@@ -121,34 +126,39 @@ def get_enocoded_length_by_graph_type(graph, num_nodes_G):
 		
 	# full bi-partite core
 	elif graph_type == "fb":
-		cardinality_a = 
-		cardinality_b = 
-		nodeIds_a_b = math.log(math.factorial(num_nodes_G)//(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
+		cardinality_a = graph.numNodes_A
+		cardinality_b = graph.numNodes_B
+		nodeIds_a_b = math.log(math.comb(num_nodes_G)//(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
 		desc_len = cardinality_a+cardinality_b+nodeIds_a_b
 
-		pass
 	# near bi-partite core
 	elif graph_type == "nb":
-		cardinality_a = 
-		cardinality_b = 
-		nodeIds_a_b = math.log(math.factorial(num_nodes_G)//(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
-		num_edges = math.log(area_nc)
-		edges = 
-		desc_len = cardinality_a+cardinality_b+nodeIds_a_b+num_edges+edges
-		pass
+		cardinality_a = graph.numNodes_A # property needs to be defined
+		cardinality_b = graph.numNodes_B # property needs to be defined
+                cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
+		# nodeIds_a_b = # TBD once nC(a, b) notation determined
+		# num_edges = math.log(area_nc)
+		# edges = # TBD once form of l_0 function confirmed
+		# desc_len = cardinality_a+cardinality_b+nodeIds_a_b+num_edges+edges
+		
 	# chain
-	elif graph_type == "ch":	
-		pass
+	elif graph_type == "ch":
+		cardinality_ch = graph.numNodes
+		num_nodes = LN(cardinality_ch - 1)
+		node_ids = 0
+		for i in range(cardinality_ch + 1):
+			node_ids += math.log(num_nodes_G - i)
+		
+		desc_len = num_nodes + node_ids
+                
 	# star
 	elif graph_type == "st":
-		 
-		cardinality_st = graph.numNodes
-		num_spokes = LN(cardinality_st-1)
-		hub_node_id = log(num_nodes_G)
-		spokeNodesID = math.log(math.comb(num_nodes_G-1, cardinality_st-1))
-		desc_len= num_spokes+hub_node_id+spokeNodesID
-		pass
-
+		cardinality_st = graph.numSpokes
+		num_spokes = LN(cardinality_st - 1)
+		hub_node_id = math.log(num_nodes_G)
+		spoke_nodes_id = math.log(math.comb(num_nodes_G - 1, cardinality_st - 1))
+		
+		desc_len = num_spokes + hub_node_id + spoke_nodes_id
 
 	return desc_len
         

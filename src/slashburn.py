@@ -1,4 +1,4 @@
-# all code below from: https://github.com/theeluwin/bear/blob/master/utils.py
+# all code below adapted from: https://github.com/theeluwin/bear/blob/master/utils.py
 import csv
 import numpy as np
 
