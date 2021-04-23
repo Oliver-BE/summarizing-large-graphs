@@ -32,7 +32,6 @@ The best model to explain D is the smallest model containing the selected H.
 
 
 
-
 ex:  if M.numFullCliques > 0 :
       model_cost += M.numFullCliques * log(M.numFullCliques / float(M.numStructs), 2);
 
@@ -40,10 +39,17 @@ trying to check model cost
 
 2 different model costs 
 
-model cost1: 
+model cost1: the sum of the different encodings of structures. Take sum of number of structure times the log of the number of that structure/total structures
+then loop through each structure and add the length of that structure (i..e LfullClique(struc,M,G,E)). 
 
-model cost2: 
 
+model cost2/error cost: length of error type  
+
+want to return total_cost (model+error), error cost, model cost, and Error(G)
+
+minimize model + model2
+
+
+also a greedy version of MDL that we can worry about later. 
 """
-
 
