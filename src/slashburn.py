@@ -246,11 +246,15 @@ B = np.array([[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 0, 0, 
 [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1]], dtype=np.int32)
 B = coo_matrix(B)
-#print(verbose_matrix(B))
+print("Adjacency Matrix before SlashBurn:")
+print(verbose_matrix(B))
 perm2, wing2 = slashburn(B)
 B = reorder_matrix(B, perm2)
-#print()
-#print(verbose_matrix(B))
+print()
+print("Adjacency Matrix after SlashBurn:")
+print(verbose_matrix(B))
+print()
+print("List of lists of subgraph nodes:")
 print(subgraphs)
 """
 1 1                          
