@@ -5,7 +5,7 @@ import numpy as np
 from collections import defaultdict
 from scipy.sparse import coo_matrix
 
-
+subgraphs = []
 def scc(nodes=[], edges=[]):
     """
     Checks subgraphs (strongly connected means every vertex is reachable from every other vertex)
@@ -50,11 +50,12 @@ def scc(nodes=[], edges=[]):
                 f[i] = t
                 stack.pop()
     #for key in f: #builds list such that (0,0) (1,1), etc are key value pairs
-     #   print(key, f[key])  
+     #   print(key, f[key]) 
+   
     for key in f:
-        r[f[key]] = key
+        r[f[key]] = key # inverse of dictionary f
     for t in range(n, 0, -1): #index through all nodes
-        s = r[t]
+        s = r[t] 
         if avisited[s]:
             continue
         avisited[s] = True
@@ -67,6 +68,7 @@ def scc(nodes=[], edges=[]):
                 if not avisited[j]:
                     avisited[j] = True
                     stack.append(j)
+    #print([components[leader] for leader in components])    
     return [components[leader] for leader in components]
 
 def verbose_matrix(A):
@@ -130,6 +132,15 @@ def slashburn(A, k=None, greedy=True):
                 if not len(degree):
                     break
                 top = max(degree, key=degree.get)
+
+                star = [top]
+                for node in alists[top]:
+                    # check to see if alists[node] exists
+                    if node in alists:
+                        star.append(node)
+                if star not in subgraphs:
+                    subgraphs.append(star)
+
                 head.append(top)
                 alist = alists[top]
                 del degree[top]
@@ -155,11 +166,18 @@ def slashburn(A, k=None, greedy=True):
             for target in alists[source]:
                 if target in alists:
                     edges.append((source, target))
-        ccs = scc(nodes, edges) #list of all strongly connected nodes
+        ccs = scc(nodes, edges) #list of all strongly connected nodes (subgraphs)
         m = len(ccs)
         sizes = {i: len(ccs[i]) for i in range(m)} #number of neighbors?
         ordering = sorted(sizes, key=sizes.get)
-        ccs = [ccs[ordering[i]] for i in range(m)] #unsure of what this ends up storing
+        ccs = [ccs[ordering[i]] for i in range(m)] #sorts subgraphs by size
+
+        #Store subgraphs from ccs:
+        for i in range(len(ccs) - 1):
+            if len(ccs[i]) > 1 and ccs[i] not in subgraphs:
+                subgraphs.append(ccs[i])
+
+        #print(ccs)
         # todo: implement hub-ordering
         for cc in ccs:
             size = len(cc)
@@ -175,30 +193,95 @@ def slashburn(A, k=None, greedy=True):
         assert len(head) + len(tail) + len(degree) == n #check to make sure numbers make sense (assert is a debugging tool)
         if not len(degree):
             break
-    tops = tail + head[::-1]
+    #tops = tail + head[::-1] # adds all head nodes to the end of the tail list (bottom-right)
+    tops = head + tail[::-1] #top-left
     perm = [0 for _ in range(n)]
     for i in range(n):
         perm[tops[i]] = i
     return perm, iteration * k
 
 # Test Graph 
-A = np.array([[1, 1, 0, 0], [1, 1, 1, 1], [0, 1, 1, 0], [0, 1, 0, 1]], dtype=np.int32)
+A = np.array([[1, 1, 1, 0], [1, 1, 1, 1], [1, 1, 1, 0], [0, 1, 0, 1]], dtype=np.int32)
 A = coo_matrix(A)
 #print(verbose_matrix(A))
 """
-1 1
+1 1 1
 1 1 1 1
-  1 1
+1 1 1
   1   1
 """
-perm, wing = slashburn(A)
-print(wing)  # 1
-print(perm)
-A = reorder_matrix(A, perm)
+#perm, wing = slashburn(A)
+#print(wing)  # 1
+#print(perm)
+#print()
+#A = reorder_matrix(A, perm)
 #print(verbose_matrix(A))
 """
 1     1
   1   1
     1 1
 1 1 1 1
+"""
+
+""" Small graph:
+  0 1 2 3 4 5 6 7 8 9 A B C D E
+0 1 1
+1 1 1 1
+2   1 1 1
+3     1 1 1 1 1 1
+4       1 1
+5       1   1 1
+6       1   1 1
+7       1       1 1 1   1 1 1 1 
+8               1 1 
+9               1     1
+A                   1 1
+B               1       1
+C               1
+D               1             1
+E               1           1 1
+"""
+B = np.array([[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1], 
+[0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1]], dtype=np.int32)
+B = coo_matrix(B)
+#print(verbose_matrix(B))
+perm2, wing2 = slashburn(B)
+B = reorder_matrix(B, perm2)
+#print()
+#print(verbose_matrix(B))
+print(subgraphs)
+"""
+1 1                          
+1 1 1                        
+  1 1 1                      
+    1 1 1 1 1 1              
+      1 1                    
+      1   1 1                
+      1   1 1                
+      1       1 1 1   1 1 1 1
+              1 1            
+              1     1        
+                  1 1        
+              1       1      
+              1              
+              1             1
+              1           1 1
+
+1 1     1 1 1           1 1 1
+1 1   1         1   1 1      
+    1             1 1        
+  1   1         1            
+1             1              
+1           1                
+1         1 1                
+        1     1              
+  1   1         1            
+    1             1          
+  1 1               1        
+  1                   1      
+1                       1    
+1                         1  
+1          
 """
