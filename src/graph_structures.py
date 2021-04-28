@@ -14,7 +14,7 @@ class Model:
     numChains = 0
     
     def __init__(self):
-        self.strucTypes = ["fc", "nc", "bc", "nb", "st", "ch"] 
+        self.strucTypes = {"fc", "nc", "bc", "nb", "st", "ch"}
         self.numStrucTypes = len(self.strucTypes)
         self.structs = []        
         self.numStructs = 0
@@ -50,29 +50,22 @@ class Model:
         self.structs.remove(struct)
         self.numStructs -= 1
         
-        if struct.getType() not in self.strucTypes :
-            print "structure type not declared"
+        if struct.getType() not in self.strucTypes:
+            print("structure type not declared")
             
         if struct.isFullClique() :
             self.numFullCliques -= 1
         elif struct.isNearClique() :
             self.numNearCliques -= 1            
-        if struct.isFullOffDiagonal() :
-            self.numFullOffDiagonals-= 1
-        elif struct.isNearOffDiagonal() :
-            self.numNearOffDiagonals -= 1            
-        elif struct.isChain() :
-            self.numChains -= 1
-        elif struct.isStar() :
-            self.numStars -= 1
-        elif struct.isFullBiPartiteCore() :
+        elif struct.isFullBiPartiteCore():
             self.numBiPartiteCores -= 1        
-        elif struct.isNearBiPartiteCore() :
+        elif struct.isNearBiPartiteCore():
             self.numNearBiPartiteCores -= 1
-        elif struct.isCorePeriphery() :
-            self.numCorePeripheries -= 1        
-        elif struct.isJellyFish() :
-            self.numJellyFishes -= 1        
+        elif struct.isStar():
+            self.numStars -= 1  
+        elif struct.isChain():
+            self.numChains -= 1
+         
 
     def load(self, fullpath):
         fg = open(fullpath)
@@ -115,17 +108,8 @@ class Structure:
         
     def isFullClique(self):
         return False
+        
     def isNearClique(self):
-        return False
-
-    def isFullOffDiagonal(self):
-        return False
-    def isNearOffDiagonal(self):
-        return False
-
-    def isChain(self):
-        return False
-    def isStar(self):
         return False
 
     def isFullBiPartiteCore(self):
@@ -133,11 +117,11 @@ class Structure:
 
     def isNearBiPartiteCore(self):
         return False
-
-    def isCorePeriphery(self):
+        
+    def isChain(self):
         return False
 
-    def isJellyFish(self):
+    def isStar(self):
         return False
 
     @staticmethod
@@ -146,22 +130,15 @@ class Structure:
             return FullClique.load(line)
         elif line[:2] == NearClique.getType() :
             return NearClique.load(line)
-        if line[:3] == FullOffDiagonal.getType() :
-            return FullOffDiagonal.load(line)
-        elif line[:3] == NearOffDiagonal.getType() :
-            return NearOffDiagonal.load(line)
-        elif line[:2] == Chain.getType() :
-            return Chain.load(line)
+        elif line[:2] == FullBiPartiteCore.getType() :
+            return FullBiPartiteCore.load(line)
+        elif line[:2] == NearBiPartiteCore.getType() :
+            return NearBiPartiteCore.load(line) 
         elif line[:2] == Star.getType() :
             return Star.load(line)
-        elif line[:2] == BiPartiteCore.getType() :
-            return BiPartiteCore.load(line)
-        elif line[:2] == NearBiPartiteCore.getType() :
-            return NearBiPartiteCore.load(line)
-        elif line[:2] == CorePeriphery.getType() :
-            return CorePeriphery.load(line)
-        elif line[:2] == JellyFish.getType() :
-            return JellyFish.load(line) 
+        elif line[:2] == Chain.getType() :
+            return Chain.load(line)
+        
 
 class Clique(Structure) :
     nodes = []
