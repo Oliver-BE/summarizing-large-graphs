@@ -96,12 +96,13 @@ def get_enocoded_length_by_graph_type(graph, num_nodes_G):
 		cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
 		nodeIds_a_b = math.log(math.factorial(num_nodes_G)/(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
 
-		# TODO: equation for area_nb (num of all possible edges)
-		area_nb = "todo"
+		# area_nb is the number of all possible edges (numNodesLeft * numNodesRight)
+		# TODO: check this
+		area_nb = cardinality_a * cardinality_b
 		num_edges = math.log(area_nb)
 
-		# TODO: find number of present edges 
-		nb_present_edges = area_nb
+		# TODO: find number of present edges by using adjacency matrix
+		nb_present_edges = "todo"
 		nb_missing_edges = area_nb - nb_present_edges
 		l1 = -math.log(nb_present_edges / (nb_present_edges + nb_missing_edges))
 		l0 = -math.log(nb_missing_edges / (nb_present_edges + nb_missing_edges))  
