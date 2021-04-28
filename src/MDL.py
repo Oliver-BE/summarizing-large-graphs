@@ -61,7 +61,7 @@ def get_enocoded_length_by_graph_type(graph, num_nodes_G):
 	elif graph_type == "nc":
 		cardinality_nc = graph.numNodes
 		# area_nc is the number of all possible edges (num_nodes choose 2 in a clique)
-		# TODO: confirm this, the function `CalcCliqueNumPosEdges` has a different equation in the code
+		# TODO: confirm this
 		area_nc = math.comb(cardinality_nc, 2)
 
 		num_nodes = LN(cardinality_nc)
