@@ -60,17 +60,18 @@ def get_enocoded_length_by_graph_type(graph, num_nodes_G):
 	# near clique
 	elif graph_type == "nc":
 		cardinality_nc = graph.numNodes
-		# TODO: clarify if area_nc is actually just the number of edges or *all possible* edges
-		area_nc = graph.numEdges
+		# area_nc is the number of all possible edges (num_nodes choose 2 in a clique)
+		# TODO: confirm this, the function `CalcCliqueNumPosEdges` has a different equation in the code
+		area_nc = math.comb(cardinality_nc, 2)
 
 		num_nodes = LN(cardinality_nc)
 		node_ids = math.log(math.comb(num_nodes_G, cardinality_nc))
 		num_edges = math.log(area_nc)
 		
 		# TODO: clarify if present_edges is actually just the number of edges 
-		nc_present_edges = area_nc 
-		# if my near-clique has z nodes and w edges, then the number of missing edges is z(z-1)/2 - w
-		nc_missing_edges = cardinality_nc(cardinality_nc - 1)/2 - area_nc
+		nc_present_edges = graph.numEdges 
+		# if a near-clique has z nodes and w edges, then the number of missing edges is z(z-1)/2 - w
+		nc_missing_edges = area_nc - nc_present_edges
 		l1 = -math.log(nc_present_edges / (nc_present_edges + nc_missing_edges))
 		l0 = -math.log(nc_missing_edges / (nc_present_edges + nc_missing_edges))
 		edges = nc_present_edges * l1 + nc_missing_edges * l0 
@@ -95,14 +96,13 @@ def get_enocoded_length_by_graph_type(graph, num_nodes_G):
 		cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
 		nodeIds_a_b = math.log(math.factorial(num_nodes_G)/(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
 
-		# TODO: clarify if area_nb is actually just the number of edges or *all possible* edges
-		area_nb = graph.numEdges
+		# TODO: equation for area_nb (num of all possible edges)
+		area_nb = "todo"
 		num_edges = math.log(area_nb)
 
-		# TODO: clarify if present_edges is actually just the number of edges 
-		nb_present_edges = area_nb 
-		# TODO: still need equation to find missing edges for near bi-partite core
-		nb_missing_edges = "todo" 
+		# TODO: find number of present edges 
+		nb_present_edges = area_nb
+		nb_missing_edges = area_nb - nb_present_edges
 		l1 = -math.log(nb_present_edges / (nb_present_edges + nb_missing_edges))
 		l0 = -math.log(nb_missing_edges / (nb_present_edges + nb_missing_edges))  
 		edges = nb_present_edges * l1 + nb_missing_edges * l0
