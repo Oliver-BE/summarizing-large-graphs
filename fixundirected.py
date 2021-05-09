@@ -15,6 +15,7 @@ with open(sys.argv[1], "rt") as infile:
 """
 
 def createAdjMatrix (fileName):
+    # Code from StackOverflow https://stackoverflow.com/questions/47663030/how-to-convert-text-file-to-adjancency-matrix-in-python
     f = open(fileName, 'r')
     graph = {}
     n = 0
@@ -45,13 +46,14 @@ def createAdjMatrix (fileName):
             else:
                 row.append(0)
         adjacencyMatrix.append(row)
-
+    return adjacencyMatrix
+    """
     for i in range(n):
         row = ""
         for j in range(n):
             row += str(adjacencyMatrix[i][j])+" "
 
         print(row)
-
+    """
 graph = 'testgraph.txt'
-createAdjMatrix(graph)
+adjMatrix = createAdjMatrix(graph)
