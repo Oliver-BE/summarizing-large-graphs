@@ -18,7 +18,7 @@ def runVoG():
     # step 1: graph decomposition with slashburn
     # slashburn()
     # step 2: identifying graph substructure types
-    # step 3: calculate MDL costs
+    # step 3: calculate MDL costs (including encoding error)
     # step 4: calculate best model using heuristics
     pass
 
