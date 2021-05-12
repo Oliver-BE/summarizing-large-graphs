@@ -11,7 +11,7 @@ def runVoG():
     # step 3: calculate MDL costs (including encoding error)
     # step 4: calculate best model using heuristics
 
-def runVoG_verobse(): 
+def runVoG_verbose(): 
     # step 0: read in dataset and create adjacency matrix
     A = createAdjMatrix(args.path)  
     print("Adjacency matrix A:", flush=True)
@@ -40,10 +40,10 @@ if __name__ == "__main__":
 
     # verbose version of VoG (print statements excluded)
     if args.v:
-        runVoG_verobse()
+        runVoG_verbose()
     # no print statements (runs faster)
     else:
         runVoG()
-
+        
 # TODO: add parameter to determine the minimum size of a subgraph we consider as a structure
 # VoG has this parameter set to 10 nodes (and 3 for the Wikipedia graph) -- see Section 5.1

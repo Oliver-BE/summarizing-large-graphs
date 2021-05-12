@@ -118,4 +118,6 @@ def coverFullClique(G, E, c):
                         E.addModellingError(i,j);
     return;
 """
+
+
 # Next step: implement functionality for adding subgraphs to model; calculating encoding error comes with that

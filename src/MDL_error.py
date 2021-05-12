@@ -1,10 +1,10 @@
 # Base of code taken from MDL_error https://github.com/GemsLab/VoG_Graph_Summarization
 from math import log,factorial;
-import MDL;
+from MDL import *
+from error import * 
 
 ### Encoding the Error
 
-# here I encode all errors uniformly by a binomial -- hence, not yet the typed advanced stuff yet!
 '''
 def LErrorNaiveBinom(G, M, E) :
     # possible number of edges in an undirected, non-self-connected graph of N nodes
@@ -13,15 +13,14 @@ def LErrorNaiveBinom(G, M, E) :
     if config.optVerbosity > 1 : print ' - L_nb(E)', cost
     return cost
 '''
-def LErrorNaivePrefix(G, M, E) :
+def LErrorNaivePrefix(G, M, E) : #Why do we need the M if it's never called? 
     # possible number of edges in an undirected, non-self-connected graph of N nodes
     posNumEdges = (G.numNodes * G.numNodes - G.numNodes) / 2
     cost = LnU(posNumEdges - E.numCellsExcluded, E.numModellingErrors + E.numUnmodelledErrors)
-    if config.optVerbosity > 1 : print ' - L_np(E)', cost
+    #if config.optVerbosity > 1 : print ' - L_np(E)', cost
     return cost
 
-# here I encode all errors uniformly by a binomial -- hence, not yet the typed advanced stuff yet!
-# Comment error; this is the typed stuff
+
 
 '''
 def LErrorTypedBinom(G, M, E) :
