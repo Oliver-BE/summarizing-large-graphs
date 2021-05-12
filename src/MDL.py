@@ -125,7 +125,6 @@ def get_enocoded_length_by_graph_type(graph, num_nodes_G):
 	elif graph_type == "st":
 		cardinality_st = graph.numSpokes
 		num_spokes = LN(cardinality_st - 1)
-
 		hub_node_id = math.log(num_nodes_G)
 		spoke_nodes_id = math.log(math.comb(num_nodes_G - 1, cardinality_st - 1))
 		

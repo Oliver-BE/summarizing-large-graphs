@@ -21,6 +21,7 @@ def getDegree(node, A, V):
     return degree
     
 
+
 def isChain(V, A):
     #first check is if all nodes have two neighbors except two (Which have one)
     oneCount = 0 
@@ -90,22 +91,6 @@ def isClique(V, A):
     
     return True    
 
-# Test Graph 
-test_A = np.array([[0, 1, 1, 1], [1, 0, 1, 1], [1, 1, 0, 1], [1, 1, 1, 0]], dtype=np.int32)
-np.set_printoptions(threshold=np.inf)
-
-print(test_A)
-test_V = [3, 1, 2, 0]
-
-test_B = np.array([[0, 1, 1, 0], [1, 0, 0, 1], [1, 0, 0, 1], [0, 1, 1, 0]])
-test_Star = [1, 0, 2]
-test_Chain = [0, 1, 2]
-
-# true 
-print(isClique(test_V, test_A))
-print(isStar(test_Star, test_B))
-print(isChain(test_Chain, test_B))
-
 def isBipartiteCore(V, A):
   """ 
   Args:
@@ -115,6 +100,7 @@ def isBipartiteCore(V, A):
     True if the list of vertices form a full bipartite core, false if not.
     A full bipartite core is defined as a bipartite graph that has a full set of connections
     between both of the two sets A and B forming the graph.
+    
   """
   queue = deque() 
   set_A = set()
@@ -158,7 +144,7 @@ def isBipartiteCore(V, A):
   # otherwise, it's bipartite but not fully connected, so false
   else:
     return False
-
+"""
 test_V_bc = [3, 1, 2, 0, 4]
 test_A_bc_true = np.array([[1, 0, 1, 1, 1], \
                           [0, 1, 1, 1, 1], \
@@ -175,7 +161,9 @@ test_A_bc_false = np.array([[1, 0, 1, 1, 1], \
 print("bipartite:")
 print(isBipartiteCore(test_V_bc, test_A_bc_true))
 print(isBipartiteCore(test_V_bc, test_A_bc_false))
+"""
 
+# TODO: generate subgraph objects given results from functions above.
             
                  
 

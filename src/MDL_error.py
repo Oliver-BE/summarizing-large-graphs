@@ -2,17 +2,17 @@
 from math import log,factorial;
 import MDL;
 
-
 ### Encoding the Error
 
 # here I encode all errors uniformly by a binomial -- hence, not yet the typed advanced stuff yet!
+'''
 def LErrorNaiveBinom(G, M, E) :
     # possible number of edges in an undirected, non-self-connected graph of N nodes
     posNumEdges = (G.numNodes * G.numNodes - G.numNodes) / 2
     cost = LU(posNumEdges - E.numCellsExcluded, E.numUnmodelledErrors + E.numModellingErrors)
     if config.optVerbosity > 1 : print ' - L_nb(E)', cost
     return cost
-
+'''
 def LErrorNaivePrefix(G, M, E) :
     # possible number of edges in an undirected, non-self-connected graph of N nodes
     posNumEdges = (G.numNodes * G.numNodes - G.numNodes) / 2
@@ -21,6 +21,9 @@ def LErrorNaivePrefix(G, M, E) :
     return cost
 
 # here I encode all errors uniformly by a binomial -- hence, not yet the typed advanced stuff yet!
+# Comment error; this is the typed stuff
+
+'''
 def LErrorTypedBinom(G, M, E) :
     # possible number of edges in an undirected, non-self-connected graph of N nodes
     posNumEdges = (G.numNodes * G.numNodes - G.numNodes) / 2
@@ -38,16 +41,16 @@ def LErrorTypedBinom(G, M, E) :
     costU = LU(posNumEdges - E.numCellsCovered, E.numUnmodelledErrors)
     if config.optVerbosity > 1 : print ' - L_tb(E-)', costU
     return costM + costU
-
+'''
 def LErrorTypedPrefix(G, M, E) :
     # possible number of edges in an undirected, non-self-connected graph of N nodes
     posNumEdges = (G.numNodes * G.numNodes - G.numNodes) / 2
     costM = LnU(E.numCellsCovered - E.numCellsExcluded, E.numModellingErrors)
-    if config.optVerbosity > 1 : print ' - L_tp(E+)', costM
+    # if config.optVerbosity > 1 : print ' - L_tp(E+)', costM
     costU = LnU(posNumEdges - E.numCellsCovered, E.numUnmodelledErrors)
-    if config.optVerbosity > 1 : print ' - L_tp(E-)', costU
+    # if config.optVerbosity > 1 : print ' - L_tp(E-)', costU
     #print E.numCellsCovered, E.numCellsExcluded, E.numModellingErrors, posNumEdges, E.numUnmodelledErrors;
-    return costM + costU;
+    return costM + costU
 
 
 def LnU(n,k):
@@ -59,9 +62,11 @@ def LnU(n,k):
     return (k * x + (n-k) * y)
 
     # Encoded length of `n` 0/1 entries with `k` 1s (aka, Uniform)
+
+
+'''
 def LU(n,k) :
     if n==0 or k==0 :
         return 0;   
     return log(choose(n,k),2)
-
-# Notes: I think LErrorTypedBinom is the one to use; need to keep track of modelling errors to calculate error cost
+'''

@@ -1,5 +1,6 @@
 import sys
-# run by doing python fixundirected oldfile.txt > newfile.txt
+import numpy as np
+ 
 """
 with open(sys.argv[1], "rt") as infile:
     edges = set()
@@ -15,7 +16,10 @@ with open(sys.argv[1], "rt") as infile:
 """
 
 def createAdjMatrix (fileName):
-    # Code from StackOverflow https://stackoverflow.com/questions/47663030/how-to-convert-text-file-to-adjancency-matrix-in-python
+    """
+    Code from StackOverflow https://stackoverflow.com/questions/47663030/how-to-convert-text-file-to-adjancency-matrix-in-python
+    Reads in a file and returns the resulting adjacency matrix as a numpy list of lists.
+    """
     f = open(fileName, 'r')
     graph = {}
     n = 0
@@ -39,13 +43,15 @@ def createAdjMatrix (fileName):
 
     adjacencyMatrix = []
     for i in range(1,n+1):
-        row = []
+        row = [] 
         for j in range(1,n+1):
             if i in list(graph) and j in graph[i]:
                 row.append(1)
             else:
                 row.append(0)
         adjacencyMatrix.append(row)
+
+    adjacencyMatrix = np.asarray(adjacencyMatrix, dtype=np.int32)
     return adjacencyMatrix
     """
     for i in range(n):
@@ -55,5 +61,8 @@ def createAdjMatrix (fileName):
 
         print(row)
     """
-graph = 'testgraph.txt'
-adjMatrix = createAdjMatrix(graph)
+
+# graph = '../dat/testgraph.txt'
+# adjMatrix = createAdjMatrix(graph)
+# for row in adjMatrix:
+#     print(row)

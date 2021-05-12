@@ -5,7 +5,6 @@ import numpy as np
 from collections import defaultdict
 from scipy.sparse import coo_matrix
 
-subgraphs = []
 def scc(nodes=[], edges=[]):
     """
     Checks subgraphs (strongly connected means every vertex is reachable from every other vertex)
@@ -112,6 +111,7 @@ def slashburn(A, k=None, greedy=True):
     Returns:
         (perm, wing): Permutation of node indicies and size of wing (int).
     """
+    subgraphs = []
     n, _ = A.shape
     if k is None:
         k = max(1, int(0.001 * n))
@@ -198,94 +198,112 @@ def slashburn(A, k=None, greedy=True):
     perm = [0 for _ in range(n)]
     for i in range(n):
         perm[tops[i]] = i
-    return perm, iteration * k
+    return perm, subgraphs
 
-# Test Graph 
-A = np.array([[1, 1, 1, 0], [1, 1, 1, 1], [1, 1, 1, 0], [0, 1, 0, 1]], dtype=np.int32)
-A = coo_matrix(A)
-#print(verbose_matrix(A))
-"""
-1 1 1
-1 1 1 1
-1 1 1
-  1   1
-"""
-#perm, wing = slashburn(A)
-#print(wing)  # 1
-#print(perm)
-#print()
-#A = reorder_matrix(A, perm)
-#print(verbose_matrix(A))
-"""
-1     1
-  1   1
-    1 1
-1 1 1 1
-"""
+def run_slashburn(A):
+    """
+    Runs SlashBurn 
+    Args:
+        A (list of lists): Adjacency matrix
+    Returns:
+        (list of lists) a list of the final subgraph outputs from SlashBurn 
+    """
+    matrix_A = coo_matrix(A)
+    perm, subgraphs = slashburn(matrix_A)
+    reorder_matrix(matrix_A, perm)
+    return subgraphs
+    
+# # Test Graph 
+# A = np.array([[1, 1, 1, 0], [1, 1, 1, 1], [1, 1, 1, 0], [0, 1, 0, 1]], dtype=np.int32)
+# A = coo_matrix(A)
+# #print(verbose_matrix(A))
+# """
+# 1 1 1
+# 1 1 1 1
+# 1 1 1
+#   1   1
+# """
+# #perm, wing = slashburn(A)
+# #print(wing)  # 1
+# #print(perm)
+# #print()
+# #A = reorder_matrix(A, perm)
+# #print(verbose_matrix(A))
+# """
+# 1     1
+#   1   1
+#     1 1
+# 1 1 1 1
+# """
 
-""" Small graph:
-  0 1 2 3 4 5 6 7 8 9 A B C D E
-0 1 1
-1 1 1 1
-2   1 1 1
-3     1 1 1 1 1 1
-4       1 1
-5       1   1 1
-6       1   1 1
-7       1       1 1 1   1 1 1 1 
-8               1 1 
-9               1     1
-A                   1 1
-B               1       1
-C               1
-D               1             1
-E               1           1 1
-"""
-B = np.array([[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1], 
-[0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1]], dtype=np.int32)
-B = coo_matrix(B)
-print("Adjacency Matrix before SlashBurn:")
-print(verbose_matrix(B))
-perm2, wing2 = slashburn(B)
-B = reorder_matrix(B, perm2)
-print()
-print("Adjacency Matrix after SlashBurn:")
-print(verbose_matrix(B))
-print()
-print("List of lists of subgraph nodes:")
-print(subgraphs)
-"""
-1 1                          
-1 1 1                        
-  1 1 1                      
-    1 1 1 1 1 1              
-      1 1                    
-      1   1 1                
-      1   1 1                
-      1       1 1 1   1 1 1 1
-              1 1            
-              1     1        
-                  1 1        
-              1       1      
-              1              
-              1             1
-              1           1 1
+# """ Small graph:
+#   0 1 2 3 4 5 6 7 8 9 A B C D E
+# 0 1 1
+# 1 1 1 1
+# 2   1 1 1
+# 3     1 1 1 1 1 1
+# 4       1 1
+# 5       1   1 1
+# 6       1   1 1
+# 7       1       1 1 1   1 1 1 1 
+# 8               1 1 
+# 9               1     1
+# A                   1 1
+# B               1       1
+# C               1
+# D               1             1
+# E               1           1 1
+# """
+# B = np.array([[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+# [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1], 
+# [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+# [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1]], dtype=np.int32)
+# print("List of lists of subgraph nodes:")
+# print(type(B))
+# print(run_slashburn(B))
 
-1 1     1 1 1           1 1 1
-1 1   1         1   1 1      
-    1             1 1        
-  1   1         1            
-1             1              
-1           1                
-1         1 1                
-        1     1              
-  1   1         1            
-    1             1          
-  1 1               1        
-  1                   1      
-1                       1    
-1                         1  
-1          
-"""
+
+# B = coo_matrix(B)
+# print("Adjacency Matrix before SlashBurn:")
+# # print(verbose_matrix(B))
+# perm2, wing2 = slashburn(B)
+# B = reorder_matrix(B, perm2)
+# print()
+# print("Adjacency Matrix after SlashBurn:")
+# print(verbose_matrix(B))
+# print()
+
+# # print(subgraphs)
+# """
+# 1 1                          
+# 1 1 1                        
+#   1 1 1                      
+#     1 1 1 1 1 1              
+#       1 1                    
+#       1   1 1                
+#       1   1 1                
+#       1       1 1 1   1 1 1 1
+#               1 1            
+#               1     1        
+#                   1 1        
+#               1       1      
+#               1              
+#               1             1
+#               1           1 1
+
+# 1 1     1 1 1           1 1 1
+# 1 1   1         1   1 1      
+#     1             1 1        
+#   1   1         1            
+# 1             1              
+# 1           1                
+# 1         1 1                
+#         1     1              
+#   1   1         1            
+#     1             1          
+#   1 1               1        
+#   1                   1      
+# 1                       1    
+# 1                         1  
+# 1          
+# """
