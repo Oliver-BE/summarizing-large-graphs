@@ -20,11 +20,10 @@ def runVoG_verobse():
     print(flush=True)
 
     # step 1: graph decomposition with slashburn
-    if args.v: print("Running SlashBurn graph decomposition...", flush=True)
-    subgraphs = run_slashburn(A)
-    if args.v: 
-        print("Subgraphs generated from SlashBurn:", flush=True)
-        print(subgraphs)
+    print("Running SlashBurn graph decomposition...", flush=True)
+    subgraphs = run_slashburn(A) 
+    print("Subgraphs generated from SlashBurn:", flush=True)
+    print(subgraphs)
 
     # step 2: identifying graph substructure types
     # step 3: calculate MDL costs (including encoding error)
