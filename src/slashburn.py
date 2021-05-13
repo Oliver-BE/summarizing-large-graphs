@@ -265,8 +265,9 @@ def run_slashburn(A):
 
 # B = coo_matrix(B)
 # print("Adjacency Matrix before SlashBurn:")
-# # print(verbose_matrix(B))
+# print(verbose_matrix(B))
 # perm2, wing2 = slashburn(B)
+# print(wing2)
 # B = reorder_matrix(B, perm2)
 # print()
 # print("Adjacency Matrix after SlashBurn:")
