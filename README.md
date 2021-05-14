@@ -25,7 +25,7 @@ From the base directory, create your own virtual environment (running Python 3.9
 
 > After you install a new package, add it to the `requirements.txt` file by running `$ pip3 freeze > requirements.txt`
 
-> Note: Make sure you run `export PYTHONPATH="${PYTHONPATH}:/path/to/your/project/"` so that the local Python modules get set up correctly (important for running files in the `test` directory). `PYTHONPATH` is an environment variable which you can set to add additional directories where Python will look for modules and packages.
+> Note: Make sure you run the command `export PYTHONPATH="${PYTHONPATH}:/path/to/your/project/"` so that the local Python modules get set up correctly (important for running files in the `test` directory). See [here](https://towardsdatascience.com/how-to-fix-modulenotfounderror-and-importerror-248ce5b69b1c) for more information. `PYTHONPATH` is an environment variable which you can set to add additional directories where Python will look for modules and packages.
 
 ## Running the algorithm
 From the base directory, run `python3 src/main.py path_to_input_graph`. Run `python3 src/main.py -h` to see all possible configuration options.
