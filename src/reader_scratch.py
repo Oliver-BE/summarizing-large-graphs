@@ -2,7 +2,7 @@ from setup import createAdjMatrix
 from slashburn import *
 import argparse 
 from MDL_error import *
-# Trying to test error
+# testing error
 def test_scratch(): 
 
     A = createAdjMatrix(args.path) 

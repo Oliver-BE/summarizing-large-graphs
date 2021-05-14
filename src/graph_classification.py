@@ -1,8 +1,13 @@
+"""
+This file contains graph classification algorithms as well as graph helper methods
+(such as getting the degree of a node, or the number of edges in a graph).
+"""
 import numpy as np
 from collections import deque
+import src.MDL as mdl
 
 def getDegree(node, A, V):
-	"""
+    """
 	Args:
 		node is the node to get the degree of 
 		A is the adjacency matrix for the entire graph (which contains V).
@@ -10,21 +15,50 @@ def getDegree(node, A, V):
     Returns:
     	The degree of a specific node.
 	"""
-	degree = 0
+    degree = 0
     for neighbor in V:
         if neighbor != node and A[neighbor][node] == 1:
-		    degree += 1
+            degree += 1
     return degree	
+
+
+def getNumEdges(V, A):
+    """
+	Args:
+    	V is a list of vertices that form a subgraph.
+    	A is the adjacency matrix for the entire graph (which contains V).
+    Returns: 
+        The number of edges present in V according to A
+    """
+    # make into a set for quick lookups
+    V = set(V)
+    num_edges = 0
+    for i in range(len(A)):
+        for j in range(len(A)):
+            # if this cell is part of our subgraph and there's an edge
+            if (i in V and j in V) and (A[i][j] == 1):
+                num_edges += 1
     
+    return num_edges
+
+
+def getNumNodes(V):
+    """
+	Args:
+    	V is a list of vertices that form a subgraph.
+    Returns: 
+        The number of nodes in V (simply the length of V)
+    """
+    return len(V)
 
 
 def isChain(V, A):
-	"""
+    """
 	Args:
     	V is a list of vertices that form a subgraph.
     	A is the adjacency matrix for the entire graph (which contains V).
     Returns:
-    	True if the list of vertices form a chain, false if not.
+    	The encoding cost if the list of vertices form a chain, -1 if not.
 	"""
     # first check is if all nodes have two neighbors except two (which have one)
     oneCount = 0 
@@ -38,10 +72,10 @@ def isChain(V, A):
             else:
                 endVertex = vertex 
         elif getDegree(vertex,A, V) != 2:
-            return False
+            return -1
 
     if oneCount != 2:
-        return False
+        return -1
 	
 	# next go through from startVertex and see if you get to endVertex
     visited = set()
@@ -55,42 +89,54 @@ def isChain(V, A):
 			    break
 		
 	    if testV == currentV:
-		    return False
-			
-    return True
+		    return -1
+	
+    # return mdl.encodingCostChain(V, A)
+    return 1
     
 
 def isStar(V, A):
+    """
+	Args:
+    	V is a list of vertices that form a subgraph.
+    	A is the adjacency matrix for the entire graph (which contains V).
+    Returns:
+       The encoding cost if the list of vertices form a star, -1 if not.
+	"""
     # Identify single hub; make sure every other vertex has degree 1
-	numSpokes = len(V) - 1
+    numSpokes = len(V) - 1
     hubCount = 0
     for vertex in V:
         if getDegree(vertex, A, V) == len(V) - 1:
             hubCount += 1
         elif getDegree(vertex, A, V) != 1:
-            return False
+            return -1
     
     if hubCount == 1:
-        return True, numSpokes
+        # return mdl.encodingCostStar(V, A, numSpokes)
+        return 1
     else:
-        return False
-            
-
+        return -1
+    
+        
 def isClique(V, A):
     """
     Args:
     	V is a list of vertices that form a subgraph.
     	A is the adjacency matrix for the entire graph (which contains V).
     Returns:
-    	True if the list of vertices form a clique, false if not.
+    	A tuple (Boolean, Integer)
+    	(Boolean): True if the list of vertices form a clique, false if not.
+        (Integer): Number of spokes from the hub
     """
     # go through the entire list of vertices and make sure each has a match
     for vertex in V:
         for vertex_2 in V:
             if vertex != vertex_2 and A[vertex][vertex_2] != 1:
-                return False
-    
-    return True    
+                return - 1
+                
+    # return mdl.encodingCostFullClique(V, A)
+    return 1
 
 
 def isBipartiteCore(V, A):
@@ -99,10 +145,14 @@ def isBipartiteCore(V, A):
     	V is a list of vertices that form a subgraph.
     	A is the adjacency matrix for the entire graph (which contains V).
     Returns:
-    	True if the list of vertices form a full bipartite core, false if not.
-    	A full bipartite core is defined as a bipartite graph that has a full set of connections
-    	between both of the two sets A and B forming the graph.
+        A tuple (Boolean, Integer, Integer)
+    	(Boolean): True if the list of vertices form a full bipartite core, false if not.
+    	           A full bipartite core is defined as a bipartite graph that has a full set of connections
+    	           between both of the two sets A and B forming the graph.
+        (Integer): Number of nodes in set A
+        (Integer): Number of nodes in set B
     """
+    bp = True
     queue = deque() 
     set_A = set()
     set_B = set()
@@ -134,18 +184,38 @@ def isBipartiteCore(V, A):
                         queue.append(vertex)
 				# otherwise, if n1 has a neighbor in the same set as it, then false
                 elif ((n1 in set_A) and (vertex in set_A)) or ((n1 in set_B) and (vertex in set_B)):
-                    return False
-	
+                    return - 1
+                    
+    numNodesLeft = len(set_A)
+    numNodesRight = len(set_B)
     num_possible_edges = len(set_A) * len(set_B)
 	# we are double counting above, so divide by two here
     edges_seen /= 2
 	# at this point, we have a biparttie graph, we need make sure it's fully connected
     if edges_seen == num_possible_edges:
-	    return True
+	    # return mdl.encodingCostBipartite(V, A, numNodesLeft, numNodesRight)
+        return 1
 	# otherwise, it's bipartite but not fully connected, so false
     else:
-	    return False
-
-            
-                 
-
+        return -1  
+                    
+def getGraphType(V, A):
+    """
+    Recall that each classification function below returns an encoding cost >= 0 if true,
+    and -1 if false.
+    Args:
+    	V is a list of vertices that form a subgraph.
+    	A is the adjacency matrix for the entire graph (which contains V).
+    Returns:
+        The graph type represented as a string (or "none" if no match is found).
+    """
+    if isStar(V, A) >= 0:
+        return "st"
+    elif isClique(V, A) >= 0:
+        return "fc"
+    elif isChain(V, A) >= 0:
+        return "ch"
+    elif isBipartiteCore(V, A) >= 0:
+        return "fb"
+    else:
+        return "none" 
