@@ -21,32 +21,6 @@ def LN(z):
 		c = c + i
 		i = math.log(i, 2)
 	return c
-
-def getMDLEncodingCost():
-	"""
-	This function is used to get the length in bits of a specific 
-	graph structure type (referred to as L(s) in the paper).
-	Args:
-		V is a list of vertices that form a subgraph.
-    	A is the adjacency matrix for the entire graph (which contains V).
-	Returns:
-		The description length (in bits)
-	"""
-	desc_len = 0
-	# this gives us the graph type from our vocabulary {fc, nc, fb, nb, ch, st}
-	graph_type = gc.getGraphType(V, A)
-	if graph_type == "fc":
-		pass
-	elif graph_type == "fb":
-		pass
-	elif graph_type == "ch":
-		pass
-	elif graph_type == "st":
-		pass
-	elif graph_type == "none":
-		pass
-
-	return desc_len
 	
 
 def optimalCost(V, A):
@@ -94,11 +68,11 @@ def encodingCostFullClique(V, A):
 	return desc_len
 
 def encodingCostChain(V, A): 
-	num_nodes_G = len(A)
-	cardinality_ch = gc.getNumNodes(V)
+	num_nodes_G = len(A) 
+	cardinality_ch = gc.getNumNodes(V) 
 	num_nodes = LN(cardinality_ch - 1)
 	node_ids = 0
-	for i in range(cardinality_ch + 1):
+	for i in range(cardinality_ch): 
 		node_ids += math.log(num_nodes_G - i)
 	
 	desc_len = num_nodes + node_ids

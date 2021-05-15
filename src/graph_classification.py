@@ -73,10 +73,10 @@ def isChain(V, A):
             else:
                 endVertex = vertex 
         elif getDegree(vertex,A, V) != 2:
-            return (-1, cost)
+            return (False, cost)
 
     if oneCount != 2:
-        return (-1, cost)
+        return (False, cost)
 	
 	# next go through from startVertex and see if you get to endVertex
     visited = set()
@@ -90,10 +90,10 @@ def isChain(V, A):
 			    break
 		
 	    if testV == currentV:
-		    return (-1, cost)
+		    return (False, cost)
 	
     # return mdl.encodingCostChain(V, A)
-    return (1, cost)
+    return (True, cost)
     
 
 def isStar(V, A):
@@ -112,12 +112,12 @@ def isStar(V, A):
         if getDegree(vertex, A, V) == len(V) - 1:
             hubCount += 1
         elif getDegree(vertex, A, V) != 1:
-            return (-1, cost)
+            return (False, cost)
     
     if hubCount == 1:
-        return (1, cost)
+        return (True, cost)
     else:
-        return (-1, cost)
+        return (False, cost)
     
         
 def isClique(V, A):
@@ -135,9 +135,9 @@ def isClique(V, A):
     for vertex in V:
         for vertex_2 in V:
             if vertex != vertex_2 and A[vertex][vertex_2] != 1:
-                return (-1, cost)
+                return (False, cost)
                 
-    return (1, cost)
+    return (True, cost)
 
 
 def isBipartiteCore(V, A):
@@ -190,34 +190,42 @@ def isBipartiteCore(V, A):
     numNodesLeft = len(set_A)
     numNodesRight = len(set_B)
     num_possible_edges = len(set_A) * len(set_B)
-    cost = mdl.encodingCostBipartite(V, A, numNodesLeft, numNodesRight)
+    cost = mdl.encodingCostFullBipartiteCore(V, A, numNodesLeft, numNodesRight)
 	# we are double counting above, so divide by two here
     edges_seen /= 2
 	# at this point, we have a biparttie graph, we need make sure it's fully connected
     if edges_seen == num_possible_edges:
-        return (Boolean, cost)
+        return (boolean, cost)
 	# otherwise, it's bipartite but not fully connected, so false
     else:
-        return (Boolean, cost)  
+        boolean = False
+        return (boolean, cost)  
                     
-def getGraphType(V, A):
-    """
-    Recall that each classification function below returns an encoding cost >= 0 if true,
-    and -1 if false.
+def getGraphTypeAndCost(V, A):
+    """ 
+    This function is used to get the type of a graph and the length in bits of the
+	graph structure type (referred to as L(s) in the paper).
     Args:
     	V is a list of vertices that form a subgraph.
     	A is the adjacency matrix for the entire graph (which contains V).
     Returns:
-        The graph type represented as a string (or "none" if no match is found).
+        A tuple containing the subgraph, the MDL encoding cost, and the graph type represented as a string
+         (or "na" if no match is found).
     """
+    # key: graph type, value: encoding cost
     Costs = dict()
-    if isStar(V, A) >= 0:
-        return "st"
-    elif isClique(V, A) >= 0:
-        return "fc"
-    elif isChain(V, A) >= 0:
-        return "ch"
-    elif isBipartiteCore(V, A) >= 0:
-        return "fb"
+    star, Costs["st"] = isStar(V, A) 
+    chain, Costs["ch"] = isChain(V, A)
+    clique, Costs["fc"] = isClique(V, A)
+    bipartitecore, Costs["fb"] = isBipartiteCore(V, A) 
+
+    if star:
+        return (V, Costs["st"], "st")
+    elif clique:
+        return (V, Costs["fc"], "fc")
+    elif chain:
+        return (V, Costs["ch"], "ch")
+    elif bipartitecore:
+        return (V, Costs["fb"], "fb")
     else:
-        return "none" 
+        return (V, min(Costs.values()), "na")
