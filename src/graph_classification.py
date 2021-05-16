@@ -41,6 +41,20 @@ def getNumEdges(V, A):
     
     return num_edges
 
+def getEdges(V, A):
+    """
+    Args:
+        V is a list of vertices that form a subgraph.
+    	A is the adjacency matrix for the entire graph (which contains V).
+    Returns:
+        A list of all edges in V
+    """
+    edges = set()
+    for x in V:
+        for y in V:
+            if A[x][y] == 1:
+                edges.add((min(x, y), max(x, y)))
+    return edges
 
 def getNumNodes(V):
     """
@@ -193,7 +207,7 @@ def isBipartiteCore(V, A):
     cost = mdl.encodingCostFullBipartiteCore(V, A, numNodesLeft, numNodesRight)
 	# we are double counting above, so divide by two here
     edges_seen /= 2
-	# at this point, we have a biparttie graph, we need make sure it's fully connected
+	# at this point, we have a bipartite graph, we need make sure it's fully connected
     if edges_seen == num_possible_edges:
         return (boolean, cost)
 	# otherwise, it's bipartite but not fully connected, so false
@@ -201,13 +215,14 @@ def isBipartiteCore(V, A):
         boolean = False
         return (boolean, cost)  
                     
-def getGraphTypeAndCost(V, A):
+def getGraphTypeAndCost(V, A, excluded):
     """ 
     This function is used to get the type of a graph and the length in bits of the
 	graph structure type (referred to as L(s) in the paper).
     Args:
-    	V is a list of vertices that form a subgraph.
-    	A is the adjacency matrix for the entire graph (which contains V).
+    	V: a list of vertices that form a subgraph.
+    	A: the adjacency matrix for the entire graph (which contains V).
+        excluded: 
     Returns:
         A tuple containing the subgraph, the MDL encoding cost, and the graph type represented as a string
          (or "na" if no match is found).
@@ -220,12 +235,13 @@ def getGraphTypeAndCost(V, A):
     bipartitecore, Costs["fb"] = isBipartiteCore(V, A) 
 
     if star:
-        return (V, Costs["st"], "st")
+        return (V, Costs["st"], "st", excluded)
     elif clique:
-        return (V, Costs["fc"], "fc")
+        return (V, Costs["fc"], "fc", excluded)
     elif chain:
-        return (V, Costs["ch"], "ch")
+        return (V, Costs["ch"], "ch", excluded)
     elif bipartitecore:
-        return (V, Costs["fb"], "fb")
+        return (V, Costs["fb"], "fb", excluded)
     else:
-        return (V, min(Costs.values()), "na")
+        cost, excluded = mdl.optimalCost(V, A, excluded)
+        return (V, cost, "na", excluded)

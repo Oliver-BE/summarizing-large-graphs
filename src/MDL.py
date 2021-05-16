@@ -23,29 +23,36 @@ def LN(z):
 	return c
 	
 
-def optimalCost(V, A):
+def optimalCost(V, A, excluded):
 	# finds optimal encoding cost
-	cliqueCost = cliqueEncoding(V, A)
-	starCost = starEncoding(V, A)
+	cliqueCost, cliqueExcluded = cliqueEncoding(V, A)
+	starCost, starExcluded = starEncoding(V, A)
 	# Ignoring bipartite and chain estimations for now; NP hard tasks
-	return min(cliqueCost, starCost)
+	if cliqueCost <= starCost:
+		for edge in cliqueExcluded:
+			excluded.add(edge)
+		return cliqueCost, excluded
+	else:
+		for edge in starExcluded:
+			excluded.add(edge)
+		return starCost, excluded
 	
 def cliqueEncoding(V, A):
 	excluded = set()
 	for x in V:
 		for y in V:
 			if A[x][y] == 0:
-				excluded.add(min(x, y), max(x, y))
+				excluded.add((min(x, y), max(x, y)))
 	cliqueCost = encodingCostFullClique(V, A)
 	cliqueErrorCost = mdle.cliqueError(V, A, excluded)
-	return cliqueCost + cliqueErrorCost
+	return cliqueCost + cliqueErrorCost, excluded
 
 def starEncoding(V, A):
 	excluded = set()
 	hub = 0
 	degHub = 0
 	for x in V:
-		degX = gc.getDegree(x, V, A)
+		degX = gc.getDegree(x, A, V)
 		if degX > degHub:
 			hub = x
 			degHub = degX
@@ -54,7 +61,7 @@ def starEncoding(V, A):
 			excluded.add((min(x, hub), max(x, hub)))
 	starCost = encodingCostStar(V, A, len(V) - 1)
 	starErrorCost = mdle.starError(V, A, excluded, hub)
-	return starCost + starErrorCost
+	return starCost + starErrorCost, excluded
 	
 
 

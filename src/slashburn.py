@@ -101,11 +101,12 @@ def reorder_matrix(A, perm, fix_row=False, fix_col=False):
     return A
 
 
-def slashburn(A, k=None, greedy=True):
+def slashburn(A, minsize, k=None, greedy=True):
     """
     Computes SlashBurn of given coo matrix. Currently, only size-ordering works for CCs.
     Args:
         A (coo_matrix): Given coo matrix. It should be an valid adjacency matrix. It considers non-zero entries as edges, and ignores self-loops.
+        minsize (int): The minimum size of a subgraph that will be considered when generating subgraphs.
         k (int): For hub selection. There is known rule of thumb, though. `k` = 1 produces (perfectly) optimal solution, but it will be slow.
         greedy (bool): If True, it uses greedy algorithm for hub selection. Slightly slow but slightly more accurate.
     Returns:
@@ -138,7 +139,8 @@ def slashburn(A, k=None, greedy=True):
                     # check to see if alists[node] exists
                     if node in alists:
                         star.append(node)
-                if star not in subgraphs:
+               # also make sure we have subgraphs with at least minsize number of nodes
+                if star not in subgraphs and len(star) >= minsize:
                     subgraphs.append(star)
 
                 head.append(top)
@@ -174,7 +176,8 @@ def slashburn(A, k=None, greedy=True):
 
         #Store subgraphs from ccs:
         for i in range(len(ccs) - 1):
-            if len(ccs[i]) > 1 and ccs[i] not in subgraphs:
+            # include subgraphs with at least minsize number of nodes
+            if len(ccs[i]) >= minsize and ccs[i] not in subgraphs:
                 subgraphs.append(ccs[i])
 
         #print(ccs)
@@ -200,16 +203,17 @@ def slashburn(A, k=None, greedy=True):
         perm[tops[i]] = i
     return perm, subgraphs
 
-def run_slashburn(A):
+def run_slashburn(A, minsize):
     """
     Runs SlashBurn 
     Args:
         A (list of lists): Adjacency matrix
+        minsize (int): The minimum size of a subgraph that will be considered when generating subgraphs.
     Returns:
         (list of lists) a list of the final subgraph outputs from SlashBurn 
     """
     matrix_A = coo_matrix(A)
-    perm, subgraphs = slashburn(matrix_A)
+    perm, subgraphs = slashburn(matrix_A, minsize)
     reorder_matrix(matrix_A, perm)
     return subgraphs
     
