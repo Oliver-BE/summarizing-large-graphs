@@ -4,14 +4,14 @@ import src.slashburn as sb
 import src.graph_classification as gc
 import src.heuristics as h
 
-def generateCandidates(A, subgraphs):
+def generateCandidates(A, subgraphs, thresh):
     # key: string (label), value: subgraph (set of lists)
     labels = dict()
     candidates = dict()
     excluded = set()
     for subgraph in subgraphs:
         temp = []
-        V, cost, label, excluded = gc.getGraphTypeAndCost(subgraph, A, excluded)
+        V, cost, label, excluded = gc.getGraphTypeAndCost(subgraph, A, excluded, thresh)
         if args.v:
             print(f"V: {V}, cost: {cost}, label: {label}")
         if label in labels:
@@ -36,7 +36,7 @@ def runVoG():
     print("done with slashburn")
     print(f"Number of subgraphs generated: {len(subgraphs)}")
     # step 2 and 3: identifying graph substructure types and calculate MDL costs 
-    labels, candidates, excluded = generateCandidates(A, subgraphs)
+    labels, candidates, excluded = generateCandidates(A, subgraphs, args.thresh)
     print(labels)
     print("done with candidates")
     # step 4: generate models using heuristics
@@ -92,7 +92,9 @@ if __name__ == "__main__":
     parser.add_argument("-k", help="The argument 'k' used in the Top K model-selection heuristic. Default value is 10.",
                         type=int, default=10)
     parser.add_argument("-minsize", help="The minimum size of a subgraph that will be considered when generating subgraphs. Default value is 3.",
-                        type=int, default=3)                        
+                        type=int, default=3)   
+    parser.add_argument("-thresh", help="The threshold for percent number of edges needed to form a near clique. Default value is 0.9.",
+                        type=float, default=0.9)                       
     parser.add_argument("-v", help="Verbose - adds additional helpful print statements.",
                         action="store_true")                        
     args = parser.parse_args()  

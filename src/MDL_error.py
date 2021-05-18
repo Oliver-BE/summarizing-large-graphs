@@ -111,67 +111,125 @@ def LnU(n,k):
 
     # Encoded length of `n` 0/1 entries with `k` 1s (aka, Uniform)
 
+def getChainEndpoints(V, A):
+	"""
+	Used to find the endpoints of the longest chain in a subgraph that is a near-chain.
+	This is the heuristic mentioned by the paper in Section 4.2.2.
+	"""
+	visited = set()
+	queue = [V[0]]
+	# Set source as visited
+	visited.add(V[0])
 
-def cliqueError(V, A, excluded):
-	modelled = 0
-	unmodelled = len(V)*len(V)/2
-	covered = set()
-	modelledErrors = set()
-	ignored = set()
-	for x in V:
-		for y in V:
+	while queue:
+		current = queue[0]
+		# Print current node
+		print(f"Current node: {current}")
+		queue.pop(0)
 			
-			if (min(x, y), max(x, y)) in ignored:
-				continue
-			# If edge is not yet covered:
-			if (min(x, y), max(x, y)) not in covered:
+		# For every adjacent vertex to
+		# the current vertex
+		for neighbor, value in enumerate(A[s]):
+			if (A[vis][i] == 1 and  not in visited)):
+						
+				# Push the adjacent node
+				# in the queue
+				q.append(i)
+					
+				# set
+				visited[i] = True
 
-				# Then, if the edge (x, y) exists in A, remove an unmodelled error:
-				if A[x][y] == 1:
-
-					unmodelled -= 1
-
-				# If the edge doesn't exist in A, we've introduced a modelling error:
-				else:
-
-					modelled += 1
-					modelledErrors.add((min(x, y), max(x, y)))
-				# Add (x, y) to the list of covered edges
-				# Edges are added as (smallest node, largest node) because we assume the graph
-				# is undirected, and this method makes things easier.
-				covered.add((min(x, y), max(x, y)))
+def getChainEndpoints(V, A):
+	"""
+	Used to find the endpoints of the longest chain in a subgraph that is a near-chain.
+	This is the heuristic mentioned by the paper in Section 4.2.2.
+	"""
+	# print(f"V: {V}")
+	visited = set()
+	queue = []
+	# arbitrarily add first element from V
+	visited.add(V[0]) 
+	queue.append(V[0])
+	start = V[0]
+	longestPath = 1
+	pathLength = 1
+	count = 0
+	while queue:
+		s = queue.pop(0)
+		count += 1
+		print(f"start: {start}") 
+		# neighbor: vertex id, value: 0 or 1 
+		num_neighbors = 0
+		for neighbor, value in enumerate(A[s]):
+			print(f"neighbor, value: {neighbor}, {value}")
+			if value == 1 and neighbor not in visited:
+				num_neighbors += 1
+				visited.add(neighbor)
+				end = neighbor
+				print(f"end: {end}")
+				print(f"pathlength: {pathLength}")
+				queue.append(neighbor)
 				
-				if (min(x, y), max(x, y)) in excluded:
-					ignored.add((min(x, y), max(x, y)))
+		if count > num_neighbors:
+			pathLength += 1
+			count = 0
 
-			# If the edge has been covered:
-			else:
+	longestPath = max(longestPath, pathLength)
+	print(f"longestPath: {longestPath}")
+	return (start, end)
 
-				# If the edge exists in A, but the model does not contain it, remove a modelling error
-				if A[x][y] == 1 and (min(x, y), max(x, y)) in modelledErrors:
+def nearChainError(V, A, start, end, excluded):
+	pass
 
-					modelled -= 1
-
-				# Otherwise, if the edge does not exist, but the model says it does, add a modelling error
-				elif A[x][y] == 0 and (min(x, y), max(x, y)) not in modelledErrors:
-
-					modelled += 1
-
-				if (min(x, y), max(x, y)) in excluded:
-					ignored.add((min(x, y), max(x, y)))
-
-	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)
-
-def starError(V, A, excluded, hub):
+def chainError(V, A, start, end, excluded):
 	modelled = 0
 	unmodelled = len(V) - 1
 	covered = set()
 	modelledErrors = set()
-	ignored = set()
+
+	visited = set()
+	current = startVertex
+	while current != endVertex:
+		
+		for neighbor in V:
+			if A[current][neighbor] == 1 and neighbor not in visited:
+				visited.add(current)
+
+				# Update errors:
+				if (min(neighbor, current), max(neighbor, current)) not in covered:
+
+					if A[neighbor][current] == 1:
+
+						unmodelled -= 1
+					else:
+
+						modelled += 1
+						modelledErrors.add((min(neighbor, current), max(neighbor, current)))
+
+					covered.add((min(neighbor, current), max(neighbor, current)))
+					
+				else:
+					if A[current][neighbor] == 1 and (min(neighbor, current), max(neighbor, current)) in modelledErrors:
+
+						modelled -= 1
+					elif A[current][neighbor] == 0 and ((min(neighbor, current), max(neighbor, current))) not in modelledErrors:
+
+						modelled += 1
+
+				current = neighbor
+				break
+	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)
+		
+	
+def starError(V, A, hub, excluded):
+	modelled = 0
+	unmodelled = len(V) - 1
+	covered = set()
+	modelledErrors = set()
 
 	for x in V:
 		# If edge is not yet covered:
-		if (min(x, hub), max(x, hub)) in ignored:
+		if (min(x, hub), max(x, hub)) in excluded:
 				continue
 
 		if (min(x, hub), max(x, hub)) not in covered:
@@ -191,9 +249,6 @@ def starError(V, A, excluded, hub):
 			# is undirected, and this method makes things easier.
 			covered.add((min(x, hub), max(x, hub)))
 
-			if (min(x, hub), max(x, hub)) in excluded:
-					ignored.add((min(x, hub), max(x, hub)))
-
 		# If the edge has been covered:
 		else:
 
@@ -207,7 +262,150 @@ def starError(V, A, excluded, hub):
 
 				modelled += 1
 
-			if (min(x, hub), max(x, hub)) in excluded:
-					ignored.add((min(x, hub), max(x, hub)))
+	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)
+
+def cliqueError (V, A, excluded):
+	modelled = 0
+	unmodelled = len(V)*len(V)/2
+	covered = set()
+	modelledErrors = set()
+	for x in V:
+		for y in V:
+			
+			if (min(x, y), max(x, y)) in excluded:
+				continue
+			# If edge is not yet covered:
+			if (min(x, y), max(x, y)) not in covered:
+
+				# Then, if the edge (x, y) exists in A, remove an unmodelled error:
+				if A[x][y] == 1:
+
+					unmodelled -= 1
+
+				# If the edge doesn't exist in A, we've introduced a modelling error:
+				else:
+
+					modelled += 1
+					modelledErrors.add((min(x, y), max(x, y)))
+				# Add (x, y) to the list of covered edges
+				# Edges are added as (smallest node, largest node) because we assume the graph
+				# is undirected, and this method makes things easier.
+				covered.add((min(x, y), max(x, y)))
+				
+
+			# If the edge has been covered:
+			else:
+
+				# If the edge exists in A, but the model does not contain it, remove a modelling error
+				if A[x][y] == 1 and (min(x, y), max(x, y)) in modelledErrors:
+
+					modelled -= 1
+
+				# Otherwise, if the edge does not exist, but the model says it does, add a modelling error
+				elif A[x][y] == 0 and (min(x, y), max(x, y)) not in modelledErrors:
+
+					modelled += 1
+
 
 	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)
+
+
+# def cliqueApproxError(V, A, excluded):
+# 	modelled = 0
+# 	unmodelled = len(V)*len(V)/2
+# 	covered = set()
+# 	modelledErrors = set()
+# 	ignored = set()
+# 	for x in V:
+# 		for y in V:
+			
+# 			if (min(x, y), max(x, y)) in ignored:
+# 				continue
+# 			# If edge is not yet covered:
+# 			if (min(x, y), max(x, y)) not in covered:
+
+# 				# Then, if the edge (x, y) exists in A, remove an unmodelled error:
+# 				if A[x][y] == 1:
+
+# 					unmodelled -= 1
+
+# 				# If the edge doesn't exist in A, we've introduced a modelling error:
+# 				else:
+
+# 					modelled += 1
+# 					modelledErrors.add((min(x, y), max(x, y)))
+# 				# Add (x, y) to the list of covered edges
+# 				# Edges are added as (smallest node, largest node) because we assume the graph
+# 				# is undirected, and this method makes things easier.
+# 				covered.add((min(x, y), max(x, y)))
+				
+# 				if (min(x, y), max(x, y)) in excluded:
+# 					ignored.add((min(x, y), max(x, y)))
+
+# 			# If the edge has been covered:
+# 			else:
+
+# 				# If the edge exists in A, but the model does not contain it, remove a modelling error
+# 				if A[x][y] == 1 and (min(x, y), max(x, y)) in modelledErrors:
+
+# 					modelled -= 1
+
+# 				# Otherwise, if the edge does not exist, but the model says it does, add a modelling error
+# 				elif A[x][y] == 0 and (min(x, y), max(x, y)) not in modelledErrors:
+
+# 					modelled += 1
+
+# 				if (min(x, y), max(x, y)) in excluded:
+# 					ignored.add((min(x, y), max(x, y)))
+
+# 	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)
+
+# def starApproxError(V, A, excluded, hub):
+# 	modelled = 0
+# 	unmodelled = len(V) - 1
+# 	covered = set()
+# 	modelledErrors = set()
+# 	ignored = set()
+
+# 	for x in V:
+# 		# If edge is not yet covered:
+# 		if (min(x, hub), max(x, hub)) in ignored:
+# 				continue
+
+# 		if (min(x, hub), max(x, hub)) not in covered:
+
+# 			# Then, if the edge (x, y) exists in A, remove an unmodelled error:
+# 			if A[x][hub] == 1:
+
+# 				unmodelled -= 1
+
+# 			# If the edge doesn't exist in A, we've introduced a modelling error:
+# 			else:
+
+# 				modelled += 1
+# 				modelledErrors.add((min(x, hub), max(x, hub)))
+# 			# Add (x, y) to the list of covered edges
+# 			# Edges are added as (smallest node, largest node) because we assume the graph
+# 			# is undirected, and this method makes things easier.
+# 			covered.add((min(x, hub), max(x, hub)))
+
+# 			if (min(x, hub), max(x, hub)) in excluded:
+# 					ignored.add((min(x, hub), max(x, hub)))
+
+# 		# If the edge has been covered:
+# 		else:
+
+# 			# If the edge exists in A, but the model does not contain it, remove a modelling error
+# 			if A[x][hub] == 1 and (min(x, hub), max(x, hub)) in modelledErrors:
+
+# 				modelled -= 1
+
+# 			# Otherwise, if the edge does not exist, but the model says it does, add a modelling error
+# 			elif A[x][hub] == 0 and (min(x, hub), max(x, hub)) not in modelledErrors:
+
+# 				modelled += 1
+
+# 			if (min(x, hub), max(x, hub)) in excluded:
+# 					ignored.add((min(x, hub), max(x, hub)))
+
+# 	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)

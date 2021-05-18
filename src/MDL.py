@@ -78,6 +78,27 @@ def encodingCostFullClique(V, A):
 	desc_len = num_nodes + node_ids
 	return desc_len
 
+def encodingCostNearClique(V, A):
+	num_nodes_G = len(A)
+	cardinality_nc = gc.getNumNodes(V)
+	# area_nc is the number of all possible edges (num_nodes choose 2 in a clique)
+	area_nc = math.comb(cardinality_nc, 2)
+
+	num_nodes = LN(cardinality_nc)
+	node_ids = math.log(math.comb(num_nodes_G, cardinality_nc))
+	num_edges = math.log(area_nc)
+		
+	nc_present_edges = gc.getNumEdges(V, A)
+	# if a near-clique has z nodes and w edges, then the number of missing edges is z(z-1)/2 - w
+	nc_missing_edges = area_nc - nc_present_edges 
+
+	l1 = -math.log(nc_present_edges / (nc_present_edges + nc_missing_edges))
+	l0 = -math.log(nc_missing_edges / (nc_present_edges + nc_missing_edges))
+	edges = nc_present_edges * l1 + nc_missing_edges * l0 
+	
+	desc_len = num_nodes + node_ids + num_edges + edges
+	return desc_len
+
 def encodingCostChain(V, A): 
 	num_nodes_G = len(A) 
 	cardinality_ch = gc.getNumNodes(V) 

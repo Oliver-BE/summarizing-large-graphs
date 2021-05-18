@@ -2,6 +2,7 @@
 This file contains graph classification algorithms as well as graph helper methods
 (such as getting the degree of a node, or the number of edges in a graph).
 """
+import math
 import numpy as np
 from collections import deque
 import src.MDL as mdl
@@ -36,10 +37,10 @@ def getNumEdges(V, A):
     for i in range(len(A)):
         for j in range(len(A)):
             # if this cell is part of our subgraph and there's an edge
-            if (i in V and j in V) and (A[i][j] == 1):
+            if (i != j) and (i in V and j in V) and (A[i][j] == 1):
                 num_edges += 1
-    
-    return num_edges
+    # because we double count in an adjacency matrix
+    return num_edges/2
 
 def getEdges(V, A):
     """
@@ -52,8 +53,9 @@ def getEdges(V, A):
     edges = set()
     for x in V:
         for y in V:
-            if A[x][y] == 1:
+            if x != y and A[x][y] == 1:
                 edges.add((min(x, y), max(x, y)))
+    
     return edges
 
 def getNumNodes(V):
@@ -144,8 +146,8 @@ def isClique(V, A):
     	(Boolean): True if the list of vertices form a clique, false if not.
         (Integer): Number of spokes from the hub
     """
-    # go through the entire list of vertices and make sure each has a match
     cost =  mdl.encodingCostFullClique(V, A)
+    # go through the entire list of vertices and make sure each has a match
     for vertex in V:
         for vertex_2 in V:
             if vertex != vertex_2 and A[vertex][vertex_2] != 1:
@@ -153,6 +155,35 @@ def isClique(V, A):
                 
     return (True, cost)
 
+def isNearClique(V, A, thresh):
+    """
+    Args:
+    	V: is a list of vertices that form a subgraph.
+    	A: is the adjacency matrix for the entire graph (which contains V).
+        thresh: the threshold for percent number of edges needed to form a "near clique" 
+    Returns:
+    	A tuple (Boolean, Integer)
+    	(Boolean): True if the list of vertices form a clique, false if not.
+        (Integer): Number of spokes from the hub
+    """
+    cost =  mdl.encodingCostNearClique(V, A)
+    num_edges = 0
+    # all possible edges is num_nodes choose 2 in a clique
+    num_possible_edges = math.comb(getNumNodes(V), 2) 
+
+    for vertex in V:
+        for vertex_2 in V:
+            if vertex != vertex_2 and A[vertex][vertex_2] == 1:
+                num_edges += 1
+
+    # because we double count in an adjacency matrix
+    num_edges /= 2 
+
+    if num_edges / num_possible_edges >= thresh:
+        return (True, cost)
+    else:
+        return (False, cost)
+    
 
 def isBipartiteCore(V, A):
     """ 
@@ -205,6 +236,7 @@ def isBipartiteCore(V, A):
     numNodesRight = len(set_B)
     num_possible_edges = len(set_A) * len(set_B)
     cost = mdl.encodingCostFullBipartiteCore(V, A, numNodesLeft, numNodesRight)
+
 	# we are double counting above, so divide by two here
     edges_seen /= 2
 	# at this point, we have a bipartite graph, we need make sure it's fully connected
@@ -215,7 +247,7 @@ def isBipartiteCore(V, A):
         boolean = False
         return (boolean, cost)  
                     
-def getGraphTypeAndCost(V, A, excluded):
+def getGraphTypeAndCost(V, A, excluded, thresh):
     """ 
     This function is used to get the type of a graph and the length in bits of the
 	graph structure type (referred to as L(s) in the paper).
@@ -223,6 +255,7 @@ def getGraphTypeAndCost(V, A, excluded):
     	V: a list of vertices that form a subgraph.
     	A: the adjacency matrix for the entire graph (which contains V).
         excluded: 
+        thresh:
     Returns:
         A tuple containing the subgraph, the MDL encoding cost, and the graph type represented as a string
          (or "na" if no match is found).
@@ -232,12 +265,17 @@ def getGraphTypeAndCost(V, A, excluded):
     star, Costs["st"] = isStar(V, A) 
     chain, Costs["ch"] = isChain(V, A)
     clique, Costs["fc"] = isClique(V, A)
+    # TODO: this check is fine for now, but for the "na" case we will have to come back and recalculate isNearClique
+    if not clique:
+        nearclique, Costs["nc"] = isNearClique(V, A, thresh)
     bipartitecore, Costs["fb"] = isBipartiteCore(V, A) 
 
     if star:
         return (V, Costs["st"], "st", excluded)
     elif clique:
         return (V, Costs["fc"], "fc", excluded)
+    elif nearclique:
+        return (V, Costs["nc"], "nc", excluded)
     elif chain:
         return (V, Costs["ch"], "ch", excluded)
     elif bipartitecore:
