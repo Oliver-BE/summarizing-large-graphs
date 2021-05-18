@@ -25,23 +25,16 @@ def MDL_error_cost(model, A, excluded):
 	# Compute no. edges
 	unmodelled = 0
 	for i in range(len(A)):
-		for j in range((i+1), len(A)):
+		for j in range(i, len(A)):
 			if A[i][j] == 1:
-				unmodelled += 1
-	
+				unmodelled += 1 
+
 	modelled = 0
 	for subgraph in model: 
 		approx = False
 		for x in subgraph:
-			for y in subgraph:
-				min_val = min(x, y)
-				print(min_val)
-				max_val =  max(x, y)
-				print(max_val)
-				temp = (min_val, max_val)
-				print(temp)
-				print(type(temp))
-				if temp in excluded:
+			for y in subgraph:  
+				if (min(x, y), max(x, y)) in excluded:
 					approx = True
 		edges = gc.getEdges(subgraph, A)
 		# NOTE: assuming that subgraph has property nodes, a list of its nodes, and property edges, a list of all its edges
@@ -99,6 +92,8 @@ def MDL_error_cost(model, A, excluded):
 
 def ErrorPrefix(num_nodes, num_covered, num_excluded, modelled, unmodelled):
 	posNumEdges = (num_nodes * num_nodes - num_nodes) / 2
+	# if (num_covered - num_excluded) - modelled < 0  or (num_covered - num_excluded) - unmodelled< 0:
+	# 	print(f"num_covered: {num_covered}, num_excluded: {num_excluded}, modelled: {modelled}, unmodelled: {unmodelled}")
 	costM = LnU(num_covered - num_excluded, modelled)
 	costU = LnU(posNumEdges - num_covered, unmodelled)
 	return costM + costU
@@ -106,7 +101,10 @@ def ErrorPrefix(num_nodes, num_covered, num_excluded, modelled, unmodelled):
 
 def LnU(n,k): 
     if n==0 or k==0 or k==n:
-        return 0;    
+        return 0
+    if n < k:
+	     return 0 
+
     x = -log(k / float(n),2)
     y = -log((n-k)/float(n),2)
     return (k * x + (n-k) * y)
@@ -116,12 +114,15 @@ def LnU(n,k):
 
 def cliqueError(V, A, excluded):
 	modelled = 0
-	unmodelled = len(V)
+	unmodelled = len(V)*len(V)/2
 	covered = set()
 	modelledErrors = set()
+	ignored = set()
 	for x in V:
 		for y in V:
 			
+			if (min(x, y), max(x, y)) in ignored:
+				continue
 			# If edge is not yet covered:
 			if (min(x, y), max(x, y)) not in covered:
 
@@ -139,6 +140,9 @@ def cliqueError(V, A, excluded):
 				# Edges are added as (smallest node, largest node) because we assume the graph
 				# is undirected, and this method makes things easier.
 				covered.add((min(x, y), max(x, y)))
+				
+				if (min(x, y), max(x, y)) in excluded:
+					ignored.add((min(x, y), max(x, y)))
 
 			# If the edge has been covered:
 			else:
@@ -153,16 +157,23 @@ def cliqueError(V, A, excluded):
 
 					modelled += 1
 
-	return ErrorPrefix(len(A), len(covered), 0, modelled, unmodelled)
+				if (min(x, y), max(x, y)) in excluded:
+					ignored.add((min(x, y), max(x, y)))
+
+	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)
 
 def starError(V, A, excluded, hub):
 	modelled = 0
-	unmodelled = len(V)
+	unmodelled = len(V) - 1
 	covered = set()
 	modelledErrors = set()
+	ignored = set()
 
 	for x in V:
 		# If edge is not yet covered:
+		if (min(x, hub), max(x, hub)) in ignored:
+				continue
+
 		if (min(x, hub), max(x, hub)) not in covered:
 
 			# Then, if the edge (x, y) exists in A, remove an unmodelled error:
@@ -180,6 +191,9 @@ def starError(V, A, excluded, hub):
 			# is undirected, and this method makes things easier.
 			covered.add((min(x, hub), max(x, hub)))
 
+			if (min(x, hub), max(x, hub)) in excluded:
+					ignored.add((min(x, hub), max(x, hub)))
+
 		# If the edge has been covered:
 		else:
 
@@ -193,4 +207,7 @@ def starError(V, A, excluded, hub):
 
 				modelled += 1
 
-	return ErrorPrefix(len(A), len(covered), 0, modelled, unmodelled)
+			if (min(x, hub), max(x, hub)) in excluded:
+					ignored.add((min(x, hub), max(x, hub)))
+
+	return ErrorPrefix(len(A), len(covered), len(ignored), modelled, unmodelled)

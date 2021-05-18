@@ -33,12 +33,19 @@ def runVoG():
     A = setup.createAdjMatrix(args.path) 
     # step 1: graph decomposition with slashburn
     subgraphs = sb.run_slashburn(A, args.minsize)
+    print("done with slashburn")
+    print(f"Number of subgraphs generated: {len(subgraphs)}")
     # step 2 and 3: identifying graph substructure types and calculate MDL costs 
-    labels, candidates, excluded = generateCandidates(A, subgraphs) 
+    labels, candidates, excluded = generateCandidates(A, subgraphs)
+    print(labels)
+    print("done with candidates")
     # step 4: generate models using heuristics
     model_plain = h.Plain(candidates)
-    model_top_k = h.Top_K(candidates, args.k) 
-    model_greedy = h.GreedyNForget(candidates, A) 
+    # print(f"plain: {model_plain}")
+    model_top_k = h.Top_K(candidates, args.k)
+    print(f"top_k: {model_top_k}")
+    model_greedy = h.GreedyNForget(candidates, A, excluded)
+    print(f"greedy: {model_greedy}") 
 
 def runVoG_verbose(): 
     # step 0: read in dataset and create adjacency matrix

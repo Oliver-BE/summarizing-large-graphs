@@ -25,8 +25,8 @@ def LN(z):
 
 def optimalCost(V, A, excluded):
 	# finds optimal encoding cost
-	cliqueCost, cliqueExcluded = cliqueEncoding(V, A)
-	starCost, starExcluded = starEncoding(V, A)
+	cliqueCost, cliqueExcluded = cliqueEncoding(V, A, excluded)
+	starCost, starExcluded = starEncoding(V, A, excluded)
 	# Ignoring bipartite and chain estimations for now; NP hard tasks
 	if cliqueCost <= starCost:
 		for edge in cliqueExcluded:
@@ -37,17 +37,19 @@ def optimalCost(V, A, excluded):
 			excluded.add(edge)
 		return starCost, excluded
 	
-def cliqueEncoding(V, A):
+def cliqueEncoding(V, A, priorExcluded):
 	excluded = set()
 	for x in V:
 		for y in V:
 			if A[x][y] == 0:
 				excluded.add((min(x, y), max(x, y)))
+	for edge in priorExcluded:
+		excluded.add(edge)
 	cliqueCost = encodingCostFullClique(V, A)
 	cliqueErrorCost = mdle.cliqueError(V, A, excluded)
 	return cliqueCost + cliqueErrorCost, excluded
 
-def starEncoding(V, A):
+def starEncoding(V, A, priorExcluded):
 	excluded = set()
 	hub = 0
 	degHub = 0
@@ -59,6 +61,8 @@ def starEncoding(V, A):
 	for x in V:
 		if A[x][hub] == 0:
 			excluded.add((min(x, hub), max(x, hub)))
+	for edge in priorExcluded:
+		excluded.add(edge)
 	starCost = encodingCostStar(V, A, len(V) - 1)
 	starErrorCost = mdle.starError(V, A, excluded, hub)
 	return starCost + starErrorCost, excluded
@@ -101,7 +105,11 @@ def encodingCostFullBipartiteCore(V, A, numNodesLeft, numNodesRight):
 	cardinality_b = numNodesRight
 
 	cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
-	nodeIds_a_b = math.log(math.factorial(num_nodes_G)/(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
+	# utilizing log(a/b) = log(a) - log(b) and log(a*b) = log(a) + log(b) properties
+	first = math.log(math.factorial(num_nodes_G))
+	second = math.log(math.factorial(cardinality_a))  
+	third = math.log(math.factorial(cardinality_b))
+	nodeIds_a_b = first - (second + third)
 
 	desc_len = cardinality_a_resp_b + nodeIds_a_b
 	return desc_len

@@ -40,7 +40,7 @@ def Top_K (candidates, k):
 	for cost in sorted_keys:
 		for candidate in candidates[cost]:
 			if (count < k):
-				Model.append(candidates[cost])
+				Model.append(candidate)
 				count += 1
 			else:
 				break
@@ -70,9 +70,9 @@ def GreedyNForget (candidates, A, excluded):
 			# we've already added the first candidate
 			if i == 0:
 				i = 1
-				next
+				continue
 			# get current candidate based on the key (cost)
-			current_candidate = candidates[cost]
+			current_candidate = candidate 
 			
 			# our new model is the old model with the current candidate added
 			Model.append(current_candidate)
