@@ -3,30 +3,42 @@ import src.setup as setup
 import src.slashburn as sb
 import src.graph_classification as gc
 import src.heuristics as h
+import src.error as err
 
 def generateCandidates(A, subgraphs, thresh):
     # key: string (label), value: subgraph (set of lists)
     labels = dict()
-    candidates = dict()
-    excluded = set()
+    candidates = dict() 
+    starApproxs = dict()
+
     for subgraph in subgraphs:
+        V, cost, label, noise, hub = gc.getGraphTypeAndCost(subgraph, A, thresh)
+        benefit = noise - cost
+        if args.v: 
+            print(f"benefit: {benefit} label: {label}")
+
         temp = []
-        V, cost, label, excluded = gc.getGraphTypeAndCost(subgraph, A, excluded, thresh)
-        if args.v:
-            print(f"V: {V}, cost: {cost}, label: {label}")
         if label in labels:
             labels[label].append(V)
         else:
             temp.append(V)
             labels[label] = temp
-        temp = []    
-        if cost in candidates:
-            candidates[cost].append(V)
+        
+        temp = [] 
+        if benefit in candidates:
+            candidates[benefit].append(V)
         else:
             temp.append(V)
-            candidates[cost] = temp 
-    
-    return labels, candidates, excluded
+            candidates[benefit] = temp
+        
+        temp = []
+        if hub in starApproxs:
+            starApproxs[hub].append(V)
+        else:
+            temp.append(V)
+            starApproxs[hub] = temp
+        
+    return labels, candidates, starApproxs
 
 def runVoG(): 
     # step 0: read in dataset and create adjacency matrix
@@ -36,15 +48,16 @@ def runVoG():
     print("done with slashburn")
     print(f"Number of subgraphs generated: {len(subgraphs)}")
     # step 2 and 3: identifying graph substructure types and calculate MDL costs 
-    labels, candidates, excluded = generateCandidates(A, subgraphs, args.thresh)
+    labels, candidates, starApproxs = generateCandidates(A, subgraphs, args.thresh)
+    E = err.Error(A)
     print(labels)
     print("done with candidates")
     # step 4: generate models using heuristics
-    model_plain = h.Plain(candidates)
+    model_plain, E = h.Plain(candidates, A, starApproxs, E)
     # print(f"plain: {model_plain}")
-    model_top_k = h.Top_K(candidates, args.k)
+    model_top_k, E = h.Top_K(candidates, args.k, A, starApproxs, E)
     print(f"top_k: {model_top_k}")
-    model_greedy = h.GreedyNForget(candidates, A, excluded)
+    model_greedy, E = h.GreedyNForget(candidates, A, starApproxs, E)
     print(f"greedy: {model_greedy}") 
 
 def runVoG_verbose(): 
@@ -63,22 +76,22 @@ def runVoG_verbose():
     print(subgraphs, "\n")
 
     # step 2 and 3: identifying graph substructure types and calculate MDL costs
-    print("Identifying graph substructure types and calculating MDL costs...")
-    labels = dict()
-    candidates = dict()
-    excluded = set()
-    labels, candidates, excluded = generateCandidates(A, subgraphs) 
+    print("Identifying graph substructure types and calculating MDL costs...") 
+    labels, candidates, starApproxs = generateCandidates(A, subgraphs, args.thresh) 
     
     print(f"Labelled candidates: {labels}", flush=True)
-    print(f"Unlabelled candidates: {candidates}", flush=True)
-    print(f"Excluded edges: {excluded}", flush=True)
+    print(f"Unlabelled candidates: {candidates}\n", flush=True) 
+
+    for label in labels.keys():
+        print(f"Label: {label}, number of structures: {len(labels[label])}")
+
     print(flush=True)
-    
+    E = err.Error(A)
     # step 4: generate models using heuristics
     print("Generating models...")
-    model_plain = h.Plain(candidates)
-    model_top_k = h.Top_K(candidates, args.k) 
-    model_greedy = h.GreedyNForget(candidates, A, excluded)
+    model_plain, E = h.Plain(candidates, A, starApproxs, E)
+    model_top_k, E = h.Top_K(candidates, args.k, A, starApproxs, E) 
+    model_greedy, E = h.GreedyNForget(candidates, A, starApproxs, E)
     
     print(f"Plain: {model_plain}")
     print(f"Top K: {model_top_k}")

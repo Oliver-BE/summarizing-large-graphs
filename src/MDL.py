@@ -23,34 +23,31 @@ def LN(z):
 	return c
 	
 
-def optimalCost(V, A, excluded):
+def optimalCost(V, A): 
 	# finds optimal encoding cost
-	cliqueCost, cliqueExcluded = cliqueEncoding(V, A, excluded)
-	starCost, starExcluded = starEncoding(V, A, excluded)
-	# Ignoring bipartite and chain estimations for now; NP hard tasks
-	if cliqueCost <= starCost:
-		for edge in cliqueExcluded:
-			excluded.add(edge)
-		return cliqueCost, excluded
-	else:
-		for edge in starExcluded:
-			excluded.add(edge)
-		return starCost, excluded
+	cliqueCost= cliqueEncoding(V, A) 
+	starCost, hub = starEncoding(V, A) 
+	# chainCost = chainEncoding(V, A, excluded) 
+	# Ignoring near bipartite core estimations; NP hard ML classification task
+	if cliqueCost <= starCost: # and cliqueCost <= chainCost: 
+		return cliqueCost, -2
+	elif starCost <= cliqueCost: # and starCost <= chainCost: 
+		return starCost, hub
+	else: 
+		# return chainCost, excluded, -3
+		pass
 	
-def cliqueEncoding(V, A, priorExcluded):
+def cliqueEncoding(V, A):
 	excluded = set()
 	for x in V:
 		for y in V:
 			if A[x][y] == 0:
 				excluded.add((min(x, y), max(x, y)))
-	for edge in priorExcluded:
-		excluded.add(edge)
 	cliqueCost = encodingCostFullClique(V, A)
-	cliqueErrorCost = mdle.cliqueError(V, A, excluded)
-	return cliqueCost + cliqueErrorCost, excluded
+	cliqueErrorCost = mdle.cliqueError(V, A)
+	return cliqueCost + cliqueErrorCost
 
-def starEncoding(V, A, priorExcluded):
-	excluded = set()
+def starEncoding(V, A):
 	hub = 0
 	degHub = 0
 	for x in V:
@@ -58,15 +55,20 @@ def starEncoding(V, A, priorExcluded):
 		if degX > degHub:
 			hub = x
 			degHub = degX
-	for x in V:
-		if A[x][hub] == 0:
-			excluded.add((min(x, hub), max(x, hub)))
-	for edge in priorExcluded:
-		excluded.add(edge)
+
 	starCost = encodingCostStar(V, A, len(V) - 1)
-	starErrorCost = mdle.starError(V, A, excluded, hub)
-	return starCost + starErrorCost, excluded
+	starErrorCost = mdle.starError(V, A, hub)
+	return ((starCost + starErrorCost), hub)
 	
+def chainEncoding(V, A, priorExcluded):
+	print("chain encoding")
+	start, end = mdle.getChainEndpoints(V, A)
+	print("chain endpoints")
+	chainCost = encodingCostChain(V, A)
+	print("chain encoding cost")
+	chainErrorCost = mdle.chainError(V, A, start, end, priorExcluded)
+	print("chain encoding error")
+	return chainCost + chainErrorCost
 
 
 def encodingCostFullClique(V, A):

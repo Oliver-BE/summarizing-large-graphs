@@ -104,5 +104,51 @@ nc_test_A_incorrect = np.array([[0, 1, 0, 0, 0, 0, 1, 0], \
                               [0, 0, 1, 0, 0, 0, 0, 0]], dtype=np.int32)
 
 print("Should be true:", gc.isNearClique(nc_test_V_correct, nc_test_A_correct, 0.8))
-print("Should be false:", gc.isNearClique(nc_test_V_incorrect, nc_test_A_incorrect, 0.9))
-print("Should return (6, 5):", mdle.getChainEndpoints(nc_test_V_incorrect, nc_test_A_incorrect))
+print("Should be false:", gc.isNearClique(nc_test_V_incorrect, nc_test_A_incorrect, 0.9), "\n")
+
+# ------------ NEAR CLIQUE ------------
+print("Testing CHAIN ENDPOINTS:")
+chain_V = [1, 4, 6, 3, 7, 2, 0, 5]
+chain_A = np.array([[0, 1, 0, 0, 0, 0, 1, 0], \
+                              [1, 0, 1, 1, 0, 0, 0, 0], \
+                              [0, 1, 0, 0, 0, 0, 0, 1], \
+                              [0, 1, 0, 0, 1, 0, 0, 0], \
+                              [0, 0, 0, 1, 0, 1, 0, 0], \
+                              [0, 0, 0, 0, 1, 0, 0, 0], \
+                              [1, 0, 0, 0, 0, 0, 0, 0], \
+                              [0, 0, 1, 0, 0, 0, 0, 0]], dtype=np.int32)
+
+chain_V_2 = [3, 0, 1, 2, 4]
+chain_A_2 = np.array([[0, 1, 1, 1, 1], \
+                      [1, 0, 1, 0, 0], \
+                      [1, 1, 0, 0, 0], \
+                      [1, 0, 0, 0, 0], \
+                      [1, 0, 0, 0, 0]], dtype=np.int32)
+
+start, end = mdle.getChainEndpoints(chain_V, chain_A)
+print(f"Should return (6, 5) or (5, 7): {start}, {end}")
+print("Should return the path:", mdle.getChainPath(start, end, chain_V, chain_A), "\n")
+# print("Should return (1, 3) or (2, 3) or (1, 4):", mdle.getChainEndpoints(chain_V_2, chain_A_2), "\n")
+
+# ------------ Sub adjacency matrix creation ------------
+print("Testing sub matrix creation:")
+sub_V = [3, 0]
+full_A = np.array([[0, 1, 1, 1], \
+                   [1, 0, 1, 0], \
+                   [1, 1, 0, 0], \
+                   [1, 0, 0, 0]], dtype=np.int32)
+
+submatrix = mdle.createSubAdjacencyMatrix(sub_V, full_A)
+print("Should return [[0, 1], [1, 0]]:", submatrix, "\n")
+
+# ------------ RAW ERROR ------------
+print("Testing RAW ERROR:") 
+chain_test_A_correct = np.array([[0, 1, 0, 0, 0], \
+                                 [1, 0, 1, 0, 0], \
+                                 [0, 1, 0, 1, 0], \
+                                 [0, 0, 1, 0, 1], \
+                                 [0, 0, 0, 1, 0]], dtype=np.int32)
+
+excluded = set()
+error = mdle.calculate_noise(chain_test_A_correct, excluded)
+print(f"Should be > 9.306: {error}")

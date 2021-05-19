@@ -6,6 +6,7 @@ import math
 import numpy as np
 from collections import deque
 import src.MDL as mdl
+import src.MDL_error as mdle
 
 def getDegree(node, A, V):
     """
@@ -247,39 +248,39 @@ def isBipartiteCore(V, A):
         boolean = False
         return (boolean, cost)  
                     
-def getGraphTypeAndCost(V, A, excluded, thresh):
+def getGraphTypeAndCost(V, A, thresh):
     """ 
     This function is used to get the type of a graph and the length in bits of the
 	graph structure type (referred to as L(s) in the paper).
     Args:
     	V: a list of vertices that form a subgraph.
     	A: the adjacency matrix for the entire graph (which contains V).
-        excluded: 
-        thresh:
+        thresh: threshold for near cliques.
     Returns:
         A tuple containing the subgraph, the MDL encoding cost, and the graph type represented as a string
          (or "na" if no match is found).
     """
-    # key: graph type, value: encoding cost
-    Costs = dict()
-    star, Costs["st"] = isStar(V, A) 
-    chain, Costs["ch"] = isChain(V, A)
-    clique, Costs["fc"] = isClique(V, A)
-    # TODO: this check is fine for now, but for the "na" case we will have to come back and recalculate isNearClique
-    if not clique:
-        nearclique, Costs["nc"] = isNearClique(V, A, thresh)
-    bipartitecore, Costs["fb"] = isBipartiteCore(V, A) 
+    noiseCost = mdle.calculate_noise(A, V)
 
-    if star:
-        return (V, Costs["st"], "st", excluded)
-    elif clique:
-        return (V, Costs["fc"], "fc", excluded)
-    elif nearclique:
-        return (V, Costs["nc"], "nc", excluded)
-    elif chain:
-        return (V, Costs["ch"], "ch", excluded)
-    elif bipartitecore:
-        return (V, Costs["fb"], "fb", excluded)
+    # key: graph type, value: encoding cost
+    Costs = dict() 
+    star, Costs["st"] = isStar(V, A) 
+    chain, Costs["ch"] = isChain(V, A) 
+    clique, Costs["fc"] = isClique(V, A)  
+    if not clique:
+        nearclique, Costs["nc"] = isNearClique(V, A, thresh) 
+    bipartitecore, Costs["fb"] = isBipartiteCore(V, A)  
+
+    if star: 
+        return (V, Costs["st"], "st", noiseCost, -1)
+    elif clique: 
+        return (V, Costs["fc"],"fc", noiseCost, -1)
+    elif nearclique: 
+        return (V, Costs["nc"], "nc", noiseCost, -1)
+    elif chain: 
+        return (V, Costs["ch"], "ch", noiseCost, -1)
+    elif bipartitecore: 
+        return (V, Costs["fb"], "fb", noiseCost, -1)
     else:
-        cost, excluded = mdl.optimalCost(V, A, excluded)
-        return (V, cost, "na", excluded)
+        cost, hub = mdl.optimalCost(V, A)
+        return (V, cost, "na", noiseCost, hub)
