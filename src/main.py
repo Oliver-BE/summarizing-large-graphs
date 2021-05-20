@@ -5,6 +5,11 @@ import src.graph_classification as gc
 import src.heuristics as h
 import src.error as err
 
+"""
+This file runs VoG. Note that you will likely want to pipe the results of the running main.py
+into a text file for further evaluation. 
+"""
+
 def generateCandidates(A, subgraphs, thresh):
     # key: string (label), value: subgraph (set of lists)
     labels = dict()
@@ -14,10 +19,11 @@ def generateCandidates(A, subgraphs, thresh):
     for subgraph in subgraphs:
         if args.v:
             if count % 100 == 0:
-                print('.', end='', flush=True)
+                print(f"{count} candidates generated", flush=True)
 
         V, cost, label, noise, hub = gc.getGraphTypeAndCost(subgraph, A, thresh)
         benefit = noise - cost
+
         if args.v: 
             print(f"benefit: {benefit} label: {label}")
 
@@ -49,28 +55,26 @@ def generateCandidates(A, subgraphs, thresh):
 def runVoG(): 
     # step 0: read in dataset and create adjacency matrix
     A = setup.createAdjMatrix(args.path) 
-    # step 1: graph decomposition with slashburn
-    print("Running SlashBurn")
-    subgraphs = sb.run_slashburn(A, args.minsize) 
-    print(f"Number of subgraphs generated from SlashBurn: {len(subgraphs)}")
+    # step 1: graph decomposition with slashburn 
+    subgraphs = sb.run_slashburn(A, args.minsize)  
     # step 2 and 3: identifying graph substructure types and calculate MDL costs 
     labels, candidates, starApproxs = generateCandidates(A, subgraphs, args.thresh)
     E1 = err.Error(A)
     E2 = err.Error(A)
-    E3 = err.Error(A)
-    for label in labels.keys():
-        print(f"Label: {label}, number of structures: {len(labels[label])}") 
+    E3 = err.Error(A) 
     # step 4: generate models using heuristics
     model_plain, E1 = h.Plain(candidates, A, starApproxs, E1)
-    print(f"Plain Model: {model_plain}")
+    print(f"Plain: {model_plain}")
+    print(f"Error: {E1.currentErrorCost()}\n")
     model_top_k, E2 = h.Top_K(candidates, args.k, A, starApproxs, E2)
-    print(f"Top_K Model: {model_top_k}")
+    print(f"Top K: {model_top_k}")
+    print(f"Error: {E2.currentErrorCost()}\n")
     model_greedy, E3 = h.GreedyNForget(candidates, A, starApproxs, E3)
-    print(f"Greedy 'N Forget Model: {model_greedy}") 
+    print(f"Greedy 'N Forget: {model_greedy}")
+    print(f"Error: {E3.currentErrorCost()}") 
 
 def runVoG_verbose(): 
-    # step 0: read in dataset and create adjacency matrix
-    print(f"Creating adjacency matrix from {args.path}...")
+    # step 0: read in dataset and create adjacency matrix 
     A = setup.createAdjMatrix(args.path)  
     print("Adjacency matrix A:")
     for row in A:
@@ -86,30 +90,27 @@ def runVoG_verbose():
 
     # step 2 and 3: identifying graph substructure types and calculate MDL costs
     print("Identifying graph substructure types and calculating MDL costs...") 
-    labels, candidates, starApproxs = generateCandidates(A, subgraphs, args.thresh) 
-    
-    # print(f"Labelled candidates: {labels}", flush=True)
-    # print(f"Unlabelled candidates: {candidates}\n", flush=True) 
+    labels, candidates, starApproxs = generateCandidates(A, subgraphs, args.thresh)  
 
+    print("\nNumber of structures by graph type:")
     for label in labels.keys():
         print(f"Label: {label}, number of structures: {len(labels[label])}")
 
-    print(flush=True)
+    print()
     E1 = err.Error(A)
     E2 = err.Error(A)
     E3 = err.Error(A)
     # step 4: generate models using heurisfdtics
     print("Generating models...")
     model_plain, E1 = h.Plain(candidates, A, starApproxs, E1)
-    model_top_k, E2 = h.Top_K(candidates, args.k, A, starApproxs, E2) 
-    model_greedy, E3 = h.GreedyNForget(candidates, A, starApproxs, E3)
-    
     print(f"Plain: {model_plain}")
     print(f"Error: {E1.currentErrorCost()}\n")
+    model_top_k, E2 = h.Top_K(candidates, args.k, A, starApproxs, E2)
     print(f"Top K: {model_top_k}")
     print(f"Error: {E2.currentErrorCost()}\n")
+    model_greedy, E3 = h.GreedyNForget(candidates, A, starApproxs, E3)
     print(f"Greedy 'N Forget: {model_greedy}")
-    print(f"Error: {E3.currentErrorCost()}")
+    print(f"Error: {E3.currentErrorCost()}") 
 
 if __name__ == "__main__":
     # deal with command line inputs

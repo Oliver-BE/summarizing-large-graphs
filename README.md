@@ -20,13 +20,13 @@ Each subgraph **x** is first tested against each vocabulary structure type above
 
 ## Getting set up
 From the base directory, create your own virtual environment (running Python 3.9.0), activate it, and install the necessary package dependencies:
-1. `$ python3.9 -m venv env` 
-2. `$ source ./env/bin/activate`
-3. `$ pip install -r ./requirements.txt`
+1. `python3.9 -m venv env` 
+2. `source ./env/bin/activate`
+3. `pip install -r ./requirements.txt`
 
-* When done working, deactivate your virtual environment by running `$ deactivate`.
+* When done working, deactivate your virtual environment by running `deactivate`.
 
-* After you install a new package (by running `pip install <package_name>`), add it to the `requirements.txt` file by running `$ pip freeze > requirements.txt`
+* After you install a new package (by running `pip install <package_name>`), add it to the `requirements.txt` file by running `pip freeze > requirements.txt`
 
 > Note: Make sure you run the command `export PYTHONPATH="${PYTHONPATH}:/path/to/your/project/"` so that the local Python modules get set up correctly (important for running files in the `test` directory). See [here](https://towardsdatascience.com/how-to-fix-modulenotfounderror-and-importerror-248ce5b69b1c) for more information. `PYTHONPATH` is an environment variable which you can set to add additional directories where Python will look for modules and packages.
 
