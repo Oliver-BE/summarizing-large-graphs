@@ -1,5 +1,10 @@
 import src.MDL_error as mdle
 
+"""
+This class gives us the funcionality to track global errors whenever we want to add a subgraph to our model, or 
+see what happens to the error if we try adding a subgraph to our model. 
+"""
+
 class Error:
     size = 0
     covered = set()
@@ -20,6 +25,14 @@ class Error:
                 if A[i][j] == 1:
                     self.unmodelled += 1
         self.oldUnmodelled = self.unmodelled
+
+        self.covered = set()
+        self.excluded = set()
+        self.modelledErrors = set()
+
+        self.oldCovered = set()
+        self.oldExcluded = set()
+        self.oldModelledErrors = set()
 
     def cover (self, x, y):
         self.covered.add((min(x, y), max(x, y)))
@@ -56,6 +69,7 @@ class Error:
     
     def add(self, V, A, hub):
         if hub == -1:
+            #print("perfect substructure")
             self.addPerfectSubgraph(V, A)
         elif hub == -2:
             self.addClique(V, A)
@@ -63,10 +77,11 @@ class Error:
             # chain stuff
             pass
         else:
+            #print("imperfect star")
             self.addStar(V, A, hub)
     
     def errorAfterAdd(self, V, A, hub):
-        if hub == -1:
+        if hub == -1 or hub == -4:
             return self.errorAfterPS(V, A)
         elif hub == -2:
             return self.errorAfterClique(V, A)

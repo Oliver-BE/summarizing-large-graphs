@@ -32,7 +32,7 @@ def createAdjMatrix (fileName):
         adjacencyList2.append(n1)
         line_num += 1
     
-    print(f"\nDone reading in {fileName}, creating adjacency matrix A...")
+    print(f"\nCreating adjacency matrix A...")
     # num cells in overall adjacency matrix
     num_cells = n * n
     five_percent = math.floor(num_cells * 0.05) 
@@ -55,6 +55,6 @@ def createAdjMatrix (fileName):
                 row.append(0)
         adjacencyMatrix.append(row)
 
-    print("\nAdjacency matrix generated")
+    print("\n")
     adjacencyMatrix = np.asarray(adjacencyMatrix, dtype=np.int32) 
     return adjacencyMatrix

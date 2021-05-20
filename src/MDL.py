@@ -21,33 +21,35 @@ def LN(z):
 		c = c + i
 		i = math.log(i, 2)
 	return c
-	
 
 def optimalCost(V, A): 
-	# finds optimal encoding cost
-	cliqueCost= cliqueEncoding(V, A) 
+	# finds optimal encoding cost of the implemented approximate structures
+	cliqueCost = fullCliqueEncoding(V, A) 
 	starCost, hub = starEncoding(V, A) 
+	# nearCliqueCost = nearCliqueEncoding(V, A)
 	# chainCost = chainEncoding(V, A, excluded) 
-	# Ignoring near bipartite core estimations; NP hard ML classification task
-	if cliqueCost <= starCost: # and cliqueCost <= chainCost: 
+	# Ignoring full and near bipartite core estimations; NP hard ML classification task
+	if cliqueCost <= starCost: #and cliqueCost <= nearCliqueCost: 
 		return cliqueCost, -2
-	elif starCost <= cliqueCost: # and starCost <= chainCost: 
+	elif starCost <= cliqueCost: #and starCost <= nearCliqueCost: 
 		return starCost, hub
 	else: 
-		# return chainCost, excluded, -3
+		#return nearCliqueCost, -4
 		pass
 	
-def cliqueEncoding(V, A):
-	excluded = set()
-	for x in V:
-		for y in V:
-			if A[x][y] == 0:
-				excluded.add((min(x, y), max(x, y)))
+def fullCliqueEncoding(V, A):
+	# Calculate encoding cost as a clique
 	cliqueCost = encodingCostFullClique(V, A)
 	cliqueErrorCost = mdle.cliqueError(V, A)
 	return cliqueCost + cliqueErrorCost
 
+def nearCliqueEncoding(V, A):
+	# Calculate encoding cost as a near-clique
+	# note for a near clique, we ignore the local error matrix so just return L(nc)
+	return encodingCostNearClique(V, A)
+
 def starEncoding(V, A):
+	# Calculate encoding cost as a star
 	hub = 0
 	degHub = 0
 	for x in V:
@@ -61,13 +63,10 @@ def starEncoding(V, A):
 	return ((starCost + starErrorCost), hub)
 	
 def chainEncoding(V, A, priorExcluded):
-	print("chain encoding")
-	start, end = mdle.getChainEndpoints(V, A)
-	print("chain endpoints")
-	chainCost = encodingCostChain(V, A)
-	print("chain encoding cost")
-	chainErrorCost = mdle.chainError(V, A, start, end, priorExcluded)
-	print("chain encoding error")
+	# Calculate encoding cost as a chain
+	start, end = mdle.getChainEndpoints(V, A) 
+	chainCost = encodingCostChain(V, A) 
+	chainErrorCost = mdle.chainError(V, A, start, end, priorExcluded) 
 	return chainCost + chainErrorCost
 
 
@@ -76,9 +75,8 @@ def encodingCostFullClique(V, A):
 	num_nodes_G = len(A)
 	cardinality_fc = gc.getNumNodes(V)
 	num_nodes = LN(cardinality_fc)
-	node_ids = math.log(math.comb(num_nodes_G, cardinality_fc))
-	desc_len = num_nodes + node_ids
-	return desc_len
+	node_ids = math.log(math.comb(num_nodes_G, cardinality_fc)) 
+	return num_nodes + node_ids
 
 def encodingCostNearClique(V, A):
 	num_nodes_G = len(A)
@@ -138,111 +136,23 @@ def encodingCostFullBipartiteCore(V, A, numNodesLeft, numNodesRight):
 	return desc_len
 
 
-
-
-
-
-
-# def get_encoded_length_by_graph_type(V, A):
-# 	"""
-# 	This function is used to get the length in bits of a specific 
-# 	graph structure type (referred to as L(s) in the paper).
-# 	Args:
-# 		V is a list of vertices that form a subgraph.
-#     	A is the adjacency matrix for the entire graph (which contains V).
-# 	Returns:
-# 		The description length (in bits)
-# 	"""
-# 	# the number of nodes in the entire, original input graph G (which is represented by A)
+# def encodingCostNearBipartiteCore(V, A, numNodesLeft, numNodesRight):
 # 	num_nodes_G = len(A)
-# 	desc_len = 0
-# 	# this gives us the graph type from our vocabulary {fc, nc, fb, nb, ch, st}
-# 	graph_type = getGraphType(V, A)
-
-# 	# full clique
-# 	if graph_type == "fc":
-# 		cardinality_fc = getNumNodes(V)
-
-# 		num_nodes = LN(cardinality_fc)
-# 		node_ids = math.log(math.comb(num_nodes_G, cardinality_fc))
+# 	cardinality_a = numNodesLeft
+# 	cardinality_b = numNodesRight
 	
-# 		desc_len = num_nodes + node_ids
-		
-# 	# near clique
-# 	elif graph_type == "nc":
-# 		cardinality_nc = getNumNodes(V)
-# 		# area_nc is the number of all possible edges (num_nodes choose 2 in a clique)
-# 		# TODO: confirm this
-# 		area_nc = math.comb(cardinality_nc, 2)
+# 	cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
+# 	nodeIds_a_b = math.log(math.factorial(num_nodes_G)/(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
 
-# 		num_nodes = LN(cardinality_nc)
-# 		node_ids = math.log(math.comb(num_nodes_G, cardinality_nc))
-# 		num_edges = math.log(area_nc)
-		
-# 		# TODO: clarify if present_edges is actually just the number of edges 
-# 		nc_present_edges = getNumEdges(V)
-# 		# if a near-clique has z nodes and w edges, then the number of missing edges is z(z-1)/2 - w
-# 		nc_missing_edges = area_nc - nc_present_edges
-# 		l1 = -math.log(nc_present_edges / (nc_present_edges + nc_missing_edges))
-# 		l0 = -math.log(nc_missing_edges / (nc_present_edges + nc_missing_edges))
-# 		edges = nc_present_edges * l1 + nc_missing_edges * l0 
-		
-# 		desc_len = num_nodes + node_ids + num_edges + edges
-		
-# 	# full bi-partite core
-# 	elif graph_type == "fb":
-# 		cardinality_a = V.numNodesLeft
-# 		cardinality_b = V.numNodesRight
+# 	# area_nb is the number of all possible edges (numNodesLeft * numNodesRight)
+# 	area_nb = cardinality_a * cardinality_b
+# 	num_edges = math.log(area_nb)
+ 
+# 	nb_present_edges = gc.getNumEdges(V, A)
+# 	nb_missing_edges = area_nb - nb_present_edges
+# 	l1 = -math.log(nb_present_edges / (nb_present_edges + nb_missing_edges))
+# 	l0 = -math.log(nb_missing_edges / (nb_present_edges + nb_missing_edges))  
+# 	edges = nb_present_edges * l1 + nb_missing_edges * l0
 
-# 		cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
-# 		nodeIds_a_b = math.log(math.factorial(num_nodes_G)/(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
-		
-# 		desc_len = cardinality_a_resp_b + nodeIds_a_b
-
-# 	# near bi-partite core
-# 	elif graph_type == "nb":
-# 		cardinality_a = V.numNodesLeft
-# 		cardinality_b = V.numNodesRight
-		
-# 		cardinality_a_resp_b = LN(cardinality_a) + LN(cardinality_b)
-# 		nodeIds_a_b = math.log(math.factorial(num_nodes_G)/(math.factorial(cardinality_a)*(math.factorial(cardinality_b))))
-
-# 		# area_nb is the number of all possible edges (numNodesLeft * numNodesRight)
-# 		# TODO: check this
-# 		area_nb = cardinality_a * cardinality_b
-# 		num_edges = math.log(area_nb)
-
-# 		# TODO: find number of present edges by using adjacency matrix
-# 		nb_present_edges = "todo"
-# 		nb_missing_edges = area_nb - nb_present_edges
-# 		l1 = -math.log(nb_present_edges / (nb_present_edges + nb_missing_edges))
-# 		l0 = -math.log(nb_missing_edges / (nb_present_edges + nb_missing_edges))  
-# 		edges = nb_present_edges * l1 + nb_missing_edges * l0
-
-# 		desc_len = cardinality_a_resp_b + nodeIds_a_b + num_edges + edges
-			
-# 	# chain
-# 	elif graph_type == "ch":
-# 		cardinality_ch = getNumNodes(V)
-# 		num_nodes = LN(cardinality_ch - 1)
-		
-# 		node_ids = 0
-# 		for i in range(cardinality_ch + 1):
-# 			node_ids += math.log(num_nodes_G - i)
-		
-# 		desc_len = num_nodes + node_ids
-                
-# 	# star
-# 	elif graph_type == "st":
-# 		cardinality_st = V.numSpokes
-# 		num_spokes = LN(cardinality_st - 1)
-# 		hub_node_id = math.log(num_nodes_G)
-# 		spoke_nodes_id = math.log(math.comb(num_nodes_G - 1, cardinality_st - 1))
-		
-# 		desc_len = num_spokes + hub_node_id + spoke_nodes_id
-	
-# 	# if none of the above types, try as all of them
-# 	elif graph_type == "none":
-# 		pass
-
+# 	desc_len = cardinality_a_resp_b + nodeIds_a_b + num_edges + edges
 # 	return desc_len

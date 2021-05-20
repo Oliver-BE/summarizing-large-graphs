@@ -12,7 +12,7 @@ MarkupSafe==2.0.0
 matplotlib==3.4.2
 matplotlib-inline==0.1.2
 networkx==2.5.1
-numpy==1.20.2
+numpy==1.20.2e
 parso==0.8.2
 pexpect==4.8.0
 pickleshare==0.7.5

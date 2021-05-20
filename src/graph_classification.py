@@ -257,30 +257,37 @@ def getGraphTypeAndCost(V, A, thresh):
     	A: the adjacency matrix for the entire graph (which contains V).
         thresh: threshold for near cliques.
     Returns:
-        A tuple containing the subgraph, the MDL encoding cost, and the graph type represented as a string
-         (or "na" if no match is found).
+        A tuple containing the subgraph, the MDL encoding cost, the graph type represented as a string,
+        the cost of encoding the subgraph as noise, and a 'hub' value, which is positive for subgraphs 
+        approximated as stars, -1 for perfect substructures, -2 for approximate cliques, and -4 for 
+        approximate near-cliques.
     """
-    noiseCost = mdle.calculate_noise(A, V)
-
+    noiseCost = mdle.calculate_noise(A, V) 
     # key: graph type, value: encoding cost
     Costs = dict() 
     star, Costs["st"] = isStar(V, A) 
-    chain, Costs["ch"] = isChain(V, A) 
+    chain, Costs["ch"] = isChain(V, A)
+    bipartitecore, Costs["fb"] = isBipartiteCore(V, A)  
     clique, Costs["fc"] = isClique(V, A)  
     if not clique:
         nearclique, Costs["nc"] = isNearClique(V, A, thresh) 
-    bipartitecore, Costs["fb"] = isBipartiteCore(V, A)  
 
     if star: 
         return (V, Costs["st"], "st", noiseCost, -1)
-    elif clique: 
-        return (V, Costs["fc"],"fc", noiseCost, -1)
-    elif nearclique: 
-        return (V, Costs["nc"], "nc", noiseCost, -1)
     elif chain: 
         return (V, Costs["ch"], "ch", noiseCost, -1)
     elif bipartitecore: 
         return (V, Costs["fb"], "fb", noiseCost, -1)
+    elif clique: 
+        return (V, Costs["fc"],"fc", noiseCost, -1)
+    elif nearclique: 
+        return (V, Costs["nc"], "nc", noiseCost, -1)
     else:
         cost, hub = mdl.optimalCost(V, A)
-        return (V, cost, "na", noiseCost, hub)
+        if hub >= 0:
+            return (V, cost, "st", noiseCost, hub)
+        else:
+            return (V, cost, "fc", noiseCost, -2)
+        #else:
+            #  return (V, cost, "nc", noiseCost, -4)
+            # pass

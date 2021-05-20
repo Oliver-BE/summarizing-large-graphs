@@ -125,9 +125,9 @@ chain_A_2 = np.array([[0, 1, 1, 1, 1], \
                       [1, 0, 0, 0, 0], \
                       [1, 0, 0, 0, 0]], dtype=np.int32)
 
-start, end = mdle.getChainEndpoints(chain_V, chain_A)
-print(f"Should return (6, 5) or (5, 7): {start}, {end}")
-print("Should return the path:", mdle.getChainPath(start, end, chain_V, chain_A), "\n")
+# start, end = mdle.getChainEndpoints(chain_V, chain_A)
+# print(f"Should return (6, 5) or (5, 7): {start}, {end}")
+# print("Should return the path:", mdle.getChainPath(start, end, chain_V, chain_A), "\n")
 # print("Should return (1, 3) or (2, 3) or (1, 4):", mdle.getChainEndpoints(chain_V_2, chain_A_2), "\n")
 
 # ------------ Sub adjacency matrix creation ------------
@@ -148,7 +148,6 @@ chain_test_A_correct = np.array([[0, 1, 0, 0, 0], \
                                  [0, 1, 0, 1, 0], \
                                  [0, 0, 1, 0, 1], \
                                  [0, 0, 0, 1, 0]], dtype=np.int32)
-
-excluded = set()
-error = mdle.calculate_noise(chain_test_A_correct, excluded)
+ 
+error = mdle.calculate_noise(chain_test_A_correct)
 print(f"Should be > 9.306: {error}")

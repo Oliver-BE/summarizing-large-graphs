@@ -3,7 +3,7 @@ This file defines the three heuristics used in the paper that select a model to 
 the graph given a set of candidate structures.
 """
 from math import log
-from src.MDL_error import MDL_error_cost 
+# from src.MDL_error import MDL_error_cost 
 
 def Plain (candidates, A, starApproxs, E):
 	"""
@@ -27,7 +27,7 @@ def Plain (candidates, A, starApproxs, E):
 					if cand == candidate:
 						candidate_hub = hub
 			E.add(candidate, A, hub)
-			E.add(candidate, A, candidate_hub)
+			# E.add(candidate, A, candidate_hub)
 	return Model, E
 
 def Top_K (candidates, k, A, starApproxs, E):
@@ -122,12 +122,12 @@ def GreedyNForget (candidates, A, starApproxs, E):
 
 def sortByQuality(candidates):
 	"""
-	Sort a dictionary by key where key is the encoding cost from lowest to highest encoding cost.
+	Sort a dictionary by key where key is the encoding benefit from highest to lowest benefit.
 	Returns a sorted list of keys.
 	"""
-	return sorted(candidates.keys())
+	return sorted(candidates.keys(), reverse=True)
 
-def getTotalEncodingCost(model, MDL_cost, A, excluded):
-	# MDL_error_cost is from the MDL_error file (converts model into adjacency matrix and computes error by taking
-	# exclusive or with original adjacency matrix A)
-	return MDL_cost + MDL_error_cost(model, A, excluded)
+# def getTotalEncodingCost(model, MDL_cost, A, excluded):
+# 	# MDL_error_cost is from the MDL_error file (converts model into adjacency matrix and computes error by taking
+# 	# exclusive or with original adjacency matrix A)
+# 	return MDL_cost + MDL_error_cost(model, A, excluded)
