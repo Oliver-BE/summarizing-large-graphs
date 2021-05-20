@@ -26,8 +26,7 @@ def Plain (candidates, A, starApproxs, E):
 				for cand in starApproxs[hub]:
 					if cand == candidate:
 						candidate_hub = hub
-			E.add(candidate, A, hub)
-			# E.add(candidate, A, candidate_hub)
+			E.add(candidate, A, hub) 
 	return Model, E
 
 def Top_K (candidates, k, A, starApproxs, E):
